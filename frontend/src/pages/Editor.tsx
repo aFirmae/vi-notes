@@ -20,42 +20,23 @@ export default function Editor() {
 
 	const titleRef = useRef(title)
 	const contentRef = useRef(content)
-	const navigatingAway = useRef(false)
 	titleRef.current = title
 	contentRef.current = content
 
 	// Sync changes to context
 	useEffect(() => {
 		if (!id) return
+		if (title === session?.title && content === session?.content) return
+		
 		updateSession(id, { title, content })
-	}, [title, content])
-
-	// Discard empty sessions on navigation
-	useEffect(() => {
-		const handlePopState = () => {
-			navigatingAway.current = true
-		}
-		window.addEventListener("popstate", handlePopState)
-		return () => {
-			window.removeEventListener("popstate", handlePopState)
-			if (navigatingAway.current && id && !titleRef.current.trim() && !contentRef.current.trim()) {
-				deleteSession(id)
-			}
-		}
-	}, [id, deleteSession])
+	}, [title, content, id, session?.title, session?.content])
 
 	const handleBack = useCallback(() => {
-		navigatingAway.current = true
-		// Clean up empty session before navigating
-		if (id && !titleRef.current.trim() && !contentRef.current.trim()) {
-			deleteSession(id)
-		}
 		navigate("/dashboard")
-	}, [id, deleteSession, navigate])
+	}, [navigate])
 
 	const handleDelete = () => {
 		if (!id) return
-		navigatingAway.current = true
 		deleteSession(id)
 		navigate("/dashboard")
 	}

@@ -68,6 +68,13 @@ export default function Dashboard() {
 		})
 	}
 
+	const formatUsername = (email?: string) => {
+		if (!email) return "Writer"
+		const name = email.split("@")[0].replace(/[0-9]/g, "")
+		if (!name) return "Writer"
+		return name.charAt(0).toUpperCase() + name.slice(1)
+	}
+
 	return (
 		<div className="min-h-screen bg-background">
 			{/* ——— Top nav ——— */}
@@ -98,7 +105,7 @@ export default function Dashboard() {
 				{/* ——— Greeting ——— */}
 				<section className="mb-10">
 					<h1 className="text-3xl font-bold tracking-tight">
-						{isNewUser ? "Welcome to Vi-Notes! 🎉" : `Welcome back, ${user?.email ? user.email.split("@")[0] : "Writer"}`}
+						{isNewUser ? "Welcome to Vi-Notes! 🎉" : `Welcome back, ${formatUsername(user?.email)}`}
 					</h1>
 					<p className="mt-1.5 text-muted-foreground">
 						{isNewUser
