@@ -8,6 +8,7 @@ import {
 	Flame,
 	LetterText,
 	Notebook,
+	Trash2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -19,11 +20,13 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { useSession } from "@/context/SessionContext"
+import { useAuth } from "@/context/AuthContext"
 
 export default function Dashboard() {
 	const navigate = useNavigate()
 	const location = useLocation()
-	const { sessions, addSession } = useSession()
+	const { user, logout } = useAuth()
+	const { sessions, addSession, deleteSession } = useSession()
 
 	const isNewUser = (location.state as { fromRegister?: boolean })?.fromRegister === true
 
@@ -41,9 +44,11 @@ export default function Dashboard() {
 		{ label: "Characters", value: totalChars.toLocaleString(), icon: Flame },
 	]
 
-	const handleNewSession = () => {
-		const id = addSession()
-		navigate(`/editor/${id}`)
+	const handleNewSession = async () => {
+		const id = await addSession()
+		if (id) {
+			navigate(`/editor/${id}`)
+		}
 	}
 
 	// ——— Format relative time ———
@@ -80,8 +85,8 @@ export default function Dashboard() {
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={() => navigate("/")}
-						className="text-muted-foreground"
+						onClick={() => logout()}
+						className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
 					>
 						<LogOut className="size-4" />
 						Sign Out
@@ -93,7 +98,7 @@ export default function Dashboard() {
 				{/* ——— Greeting ——— */}
 				<section className="mb-10">
 					<h1 className="text-3xl font-bold tracking-tight">
-						{isNewUser ? "Welcome to Vi-Notes! 🎉" : "Welcome back, Writer"}
+						{isNewUser ? "Welcome to Vi-Notes! 🎉" : `Welcome back, ${user?.email ? user.email.split("@")[0] : "Writer"}`}
 					</h1>
 					<p className="mt-1.5 text-muted-foreground">
 						{isNewUser
@@ -198,7 +203,21 @@ export default function Dashboard() {
 															</CardDescription>
 														</div>
 													</div>
-													<ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-foreground/60" />
+													<div className="flex items-center gap-2">
+														<Button
+															variant="ghost"
+															size="icon-sm"
+															className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+															onClick={(e) => {
+																e.preventDefault()
+																e.stopPropagation()
+																deleteSession(session.id)
+															}}
+														>
+															<Trash2 className="size-4" />
+														</Button>
+														<ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-foreground/60" />
+													</div>
 												</CardHeader>
 											</Card>
 										</Link>

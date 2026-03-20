@@ -1,5 +1,8 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
+import { validateEmail } from "@/lib/validation"
+import { useAuth } from "@/context/AuthContext"
+import { api } from "@/services/api"
 import { PenLine, Eye, EyeOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -15,13 +18,42 @@ import {
 
 export default function Login() {
 	const navigate = useNavigate()
+	const { login } = useAuth()
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
 	const [showPassword, setShowPassword] = useState(false)
+	const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({})
+	const [isSubmitting, setIsSubmitting] = useState(false)
 
-	const handleLogin = (e: React.FormEvent) => {
+	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault()
-		navigate("/dashboard")
+		const emailError = validateEmail(email)
+		if (emailError) {
+			setErrors({ email: emailError })
+			return
+		}
+		// Clear previous errors
+		setErrors({})
+		setIsSubmitting(true)
+
+		try {
+			const { data } = await api.post("/api/auth/login", { email, password })
+			login(data.token, data.refreshToken, data.user)
+			navigate("/dashboard")
+		} catch (err: any) {
+			const status = err.response?.status
+			const message = err.response?.data?.message
+
+			if (status === 404 || message === "User not found") {
+				setErrors({ email: "This email is not registered" })
+			} else if (status === 401 || message === "Invalid credentials") {
+				setErrors({ password: "Password is incorrect" })
+			} else {
+				setErrors({ form: message || "Something went wrong. Please try again." })
+			}
+		} finally {
+			setIsSubmitting(false)
+		}
 	}
 
 	return (
@@ -49,7 +81,13 @@ export default function Login() {
 					</CardHeader>
 
 					<form onSubmit={handleLogin}>
-						<CardContent className="space-y-5 pt-4">
+						<CardContent className="space-y-4 pt-4">
+							{errors.form && (
+								<div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
+									{errors.form}
+								</div>
+							)}
+
 							<div className="space-y-2">
 								<label
 									htmlFor="email"
@@ -62,9 +100,16 @@ export default function Login() {
 									type="email"
 									placeholder="you@example.com"
 									value={email}
-									onChange={(e) => setEmail(e.target.value)}
+									onChange={(e) => {
+										setEmail(e.target.value)
+										if (errors.email) setErrors({ ...errors, email: undefined })
+									}}
+									className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
 									required
 								/>
+								{errors.email && (
+									<p className="text-xs font-medium text-destructive">{errors.email}</p>
+								)}
 							</div>
 
 							<div className="space-y-2">
@@ -99,12 +144,15 @@ export default function Login() {
 										)}
 									</button>
 								</div>
+								{errors.password && (
+									<p className="text-xs font-medium text-destructive">{errors.password}</p>
+								)}
 							</div>
 						</CardContent>
 
 						<CardFooter className="flex flex-col gap-4 border-t-0 bg-transparent pt-4">
-							<Button type="submit" size="lg" className="mt-2 w-full">
-								Sign In
+							<Button type="submit" size="lg" className="mt-2 w-full" disabled={isSubmitting}>
+								{isSubmitting ? "Signing in..." : "Sign In"}
 							</Button>
 							<p className="text-sm text-muted-foreground">
 								Don't have an account?{" "}

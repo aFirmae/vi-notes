@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Save, PenLine, Check } from "lucide-react"
+import { ArrowLeft, Save, PenLine, Check, Trash2 } from "lucide-react"
 
 import WritingEditor from "@/components/WritingEditor"
 import { Button } from "@/components/ui/button"
@@ -53,6 +53,13 @@ export default function Editor() {
 		navigate("/dashboard")
 	}, [id, deleteSession, navigate])
 
+	const handleDelete = () => {
+		if (!id) return
+		navigatingAway.current = true
+		deleteSession(id)
+		navigate("/dashboard")
+	}
+
 	// Save feedback
 	const handleSave = () => {
 		setSaved(true)
@@ -104,24 +111,34 @@ export default function Editor() {
 						</div>
 					</div>
 
-					<Button
-						size="sm"
-						variant="outline"
-						onClick={handleSave}
-						className="shrink-0 ml-3"
-					>
-						{saved ? (
-							<>
-								<Check className="size-3.5 text-green-600" />
-								Saved
-							</>
-						) : (
-							<>
-								<Save className="size-3.5" />
-								Save
-							</>
-						)}
-					</Button>
+					<div className="flex items-center gap-2 ml-3 shrink-0">
+						<Button
+							size="sm"
+							variant="ghost"
+							onClick={handleDelete}
+							className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+						>
+							<Trash2 className="size-4" />
+						</Button>
+
+						<Button
+							size="sm"
+							variant="outline"
+							onClick={handleSave}
+						>
+							{saved ? (
+								<>
+									<Check className="size-3.5 text-green-600" />
+									Saved
+								</>
+							) : (
+								<>
+									<Save className="size-3.5" />
+									Save
+								</>
+							)}
+						</Button>
+					</div>
 				</div>
 			</header>
 
