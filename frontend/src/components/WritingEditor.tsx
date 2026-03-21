@@ -1,4 +1,5 @@
 import { LetterText, Hash } from "lucide-react"
+import type { Ref } from "react"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -6,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea"
 interface WritingEditorProps {
 	value: string
 	onChange: (value: string) => void
+	textareaRef?: Ref<HTMLTextAreaElement>
 }
 
-export default function WritingEditor({ value, onChange }: WritingEditorProps) {
+export default function WritingEditor({ value, onChange, textareaRef }: WritingEditorProps) {
 	const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0
 
 	return (
@@ -16,6 +18,7 @@ export default function WritingEditor({ value, onChange }: WritingEditorProps) {
 			<Card className="shadow-lg">
 				<CardContent className="p-0">
 					<Textarea
+						ref={textareaRef}
 						className="min-h-[520px] resize-none rounded-xl border-0 px-8 py-8 text-lg leading-loose shadow-none focus-visible:ring-0 focus-visible:shadow-none"
 						placeholder="Start writing..."
 						value={value}

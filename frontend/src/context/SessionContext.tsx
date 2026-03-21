@@ -12,7 +12,6 @@ import { useAuth } from "./AuthContext"
 // ——— Types ———
 export interface Session {
 	_id: string
-	id: string // mapped from _id
 	title: string
 	content: string
 	createdAt: string
@@ -28,7 +27,7 @@ interface SessionState {
 type SessionAction =
 	| { type: "SET_SESSIONS"; payload: Session[] }
 	| { type: "ADD_SESSION"; payload: Session }
-	| { type: "UPDATE_SESSION"; payload: Partial<Session> & { id: string } }
+	| { type: "UPDATE_SESSION"; payload: Partial<Session> & { _id: string } }
 	| { type: "DELETE_SESSION"; payload: string }
 	| { type: "SET_LOADING"; payload: boolean }
 	| { type: "SET_ERROR"; payload: string | null }
@@ -36,7 +35,7 @@ type SessionAction =
 interface SessionContextValue extends SessionState {
 	fetchSessions: () => Promise<void>
 	addSession: () => Promise<string | undefined>
-	updateSession: (id: string, data: Partial<Omit<Session, "id" | "_id">>) => Promise<void>
+	updateSession: (_id: string, data: Partial<Omit<Session, "_id">>) => Promise<void>
 	deleteSession: (id: string) => Promise<void>
 	getSession: (id: string) => Session | undefined
 }
@@ -55,7 +54,7 @@ function sessionReducer(
 			return {
 				...state,
 				sessions: state.sessions.map((s) =>
-					s.id === action.payload.id
+					s._id === action.payload._id
 						? { ...s, ...action.payload, updatedAt: new Date().toISOString() }
 						: s
 				),
@@ -63,7 +62,7 @@ function sessionReducer(
 		case "DELETE_SESSION":
 			return {
 				...state,
-				sessions: state.sessions.filter((s) => s.id !== action.payload),
+				sessions: state.sessions.filter((s) => s._id !== action.payload),
 			}
 		case "SET_LOADING":
 			return { ...state, isLoading: action.payload }
@@ -80,7 +79,7 @@ const SessionContext = createContext<SessionContextValue | null>(null)
 export function SessionProvider({ children }: { children: ReactNode }) {
 	const [state, dispatch] = useReducer(sessionReducer, {
 		sessions: [],
-		isLoading: false,
+		isLoading: true,
 		error: null,
 	})
 	
@@ -92,9 +91,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 		dispatch({ type: "SET_LOADING", payload: true })
 		try {
 			const { data } = await api.get("/api/sessions")
-			// Map backend _id to frontend id
-			const mappedSessions = data.map((s: any) => ({ ...s, id: s._id }))
-			dispatch({ type: "SET_SESSIONS", payload: mappedSessions })
+			dispatch({ type: "SET_SESSIONS", payload: data })
 		} catch (err: any) {
 			dispatch({ type: "SET_ERROR", payload: err.message || "Failed to fetch sessions" })
 		}
@@ -112,22 +109,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 	const addSession = async (): Promise<string | undefined> => {
 		try {
 			const { data } = await api.post("/api/sessions", { title: "", content: "" })
-			const newSession = { ...data, id: data._id }
-			dispatch({ type: "ADD_SESSION", payload: newSession })
-			return newSession.id
+			dispatch({ type: "ADD_SESSION", payload: data })
+			return data._id
 		} catch (err) {
 			console.error("Failed to create session:", err)
 		}
 	}
 
-	const updateSession = async (id: string, data: Partial<Omit<Session, "id" | "_id">>) => {
+	const updateSession = async (_id: string, data: Partial<Omit<Session, "_id">>) => {
 		// Optimistically update UI
-		dispatch({ type: "UPDATE_SESSION", payload: { id, ...data } })
+		dispatch({ type: "UPDATE_SESSION", payload: { _id, ...data } })
 		try {
-			await api.put(`/api/sessions/${id}`, data)
+			await api.put(`/api/sessions/${_id}`, data)
 		} catch (err) {
 			console.error("Failed to update session on server:", err)
-			// Revert? (For now, we just log error)
+			// Revert? (For now, just log error)
 		}
 	}
 
@@ -142,7 +138,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 	}
 
 	const getSession = (id: string) => {
-		return state.sessions.find((s) => s.id === id)
+		return state.sessions.find((s) => s._id === id)
 	}
 
 	return (

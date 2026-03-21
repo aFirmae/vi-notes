@@ -17,11 +17,16 @@ export default function Editor() {
 	const [title, setTitle] = useState(session?.title ?? "")
 	const [content, setContent] = useState(session?.content ?? "")
 	const [saved, setSaved] = useState(false)
+	const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
-	const titleRef = useRef(title)
-	const contentRef = useRef(content)
-	titleRef.current = title
-	contentRef.current = content
+	useEffect(() => {
+		const textarea = textareaRef.current
+		if (!textarea) return
+
+		textarea.focus()
+		const end = textarea.value.length
+		textarea.setSelectionRange(end, end)
+	}, [id])
 
 	// Sync changes to context
 	useEffect(() => {
@@ -125,7 +130,7 @@ export default function Editor() {
 
 			{/* ——— Editor area ——— */}
 			<main className="flex flex-1 justify-center px-6 py-10 animate-fade-in">
-				<WritingEditor value={content} onChange={setContent} />
+				<WritingEditor value={content} onChange={setContent} textareaRef={textareaRef} />
 			</main>
 		</div>
 	)

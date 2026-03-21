@@ -26,7 +26,7 @@ export default function Dashboard() {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const { user, logout } = useAuth()
-	const { sessions, addSession, deleteSession } = useSession()
+	const { sessions, addSession, deleteSession, isLoading } = useSession()
 
 	const isNewUser = (location.state as { fromRegister?: boolean })?.fromRegister === true
 
@@ -39,9 +39,9 @@ export default function Dashboard() {
 	const totalChars = sessions.reduce((sum, s) => sum + s.content.length, 0)
 
 	const stats = [
-		{ label: "Sessions", value: totalSessions.toLocaleString(), icon: FileText },
-		{ label: "Words Written", value: totalWords.toLocaleString(), icon: LetterText },
-		{ label: "Characters", value: totalChars.toLocaleString(), icon: Flame },
+		{ label: totalSessions === 1 ? "Session" : "Sessions", value: totalSessions.toLocaleString(), icon: FileText },
+		{ label: totalWords === 1 ? "Word Written" : "Words Written", value: totalWords.toLocaleString(), icon: LetterText },
+		{ label: totalChars === 1 ? "Character" : "Characters", value: totalChars.toLocaleString(), icon: Flame },
 	]
 
 	const handleNewSession = async () => {
@@ -153,7 +153,14 @@ export default function Dashboard() {
 					</div>
 
 					{/* ——— Empty state ——— */}
-					{sessions.length === 0 ? (
+					{isLoading ? (
+						<Card className="shadow-sm">
+							<CardContent className="flex flex-col items-center justify-center py-16 text-center">
+								<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+								<p className="mt-4 text-sm text-muted-foreground">Loading sessions...</p>
+							</CardContent>
+						</Card>
+					) : sessions.length === 0 ? (
 						<Card className="shadow-sm">
 							<CardContent className="flex flex-col items-center justify-center py-16 text-center">
 								<div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
@@ -191,11 +198,23 @@ export default function Dashboard() {
 										: 0
 									return (
 										<Link
-											key={session.id}
-											to={`/editor/${session.id}`}
+											key={session._id}
+											to={`/editor/${session._id}`}
 											className="group block"
 										>
-											<Card className="shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+											<Card className="shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 relative">
+												<Button
+													variant="ghost"
+													size="icon-sm"
+													className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+													onClick={(e) => {
+														e.preventDefault()
+														e.stopPropagation()
+														deleteSession(session._id)
+													}}
+												>
+													<Trash2 className="size-4" />
+												</Button>
 												<CardHeader className="flex-row items-center justify-between gap-4">
 													<div className="flex items-center gap-4 min-w-0">
 														<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted">
@@ -210,21 +229,7 @@ export default function Dashboard() {
 															</CardDescription>
 														</div>
 													</div>
-													<div className="flex items-center gap-2">
-														<Button
-															variant="ghost"
-															size="icon-sm"
-															className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
-															onClick={(e) => {
-																e.preventDefault()
-																e.stopPropagation()
-																deleteSession(session.id)
-															}}
-														>
-															<Trash2 className="size-4" />
-														</Button>
-														<ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-foreground/60" />
-													</div>
+													<ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-foreground/60" />
 												</CardHeader>
 											</Card>
 										</Link>
