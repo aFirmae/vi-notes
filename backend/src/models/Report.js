@@ -11,6 +11,10 @@ const reportSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		userFullName: {
+			type: String,
+			default: "Writer"
+		},
 		sessionId: {
 			type: String,
 			required: true,

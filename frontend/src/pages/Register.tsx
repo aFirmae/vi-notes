@@ -75,10 +75,11 @@ function PasswordField({
 export default function Register() {
 	const navigate = useNavigate()
 	const { login } = useAuth()
+	const [fullName, setFullName] = useState("")
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
 	const [confirmPassword, setConfirmPassword] = useState("")
-	const [errors, setErrors] = useState<{ email?: string; password?: string; confirm?: string; form?: string }>({})
+	const [errors, setErrors] = useState<{ fullName?: string; email?: string; password?: string; confirm?: string; form?: string }>({})
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const strength = getPasswordStrength(password)
@@ -86,12 +87,13 @@ export default function Register() {
 	const handleRegister = async (e: React.FormEvent) => {
 		e.preventDefault()
 		
+		const nameError = fullName.trim().length < 2 ? "Please enter your full name" : null
 		const emailError = validateEmail(email)
 		const pwError = validatePassword(password)
 		const confirmError = password !== confirmPassword ? "Passwords do not match" : null
 
-		if (emailError || pwError || confirmError) {
-			setErrors({ email: emailError || undefined, password: pwError || undefined, confirm: confirmError || undefined })
+		if (nameError || emailError || pwError || confirmError) {
+			setErrors({ fullName: nameError || undefined, email: emailError || undefined, password: pwError || undefined, confirm: confirmError || undefined })
 			return
 		}
 
@@ -99,7 +101,7 @@ export default function Register() {
 		setIsSubmitting(true)
 
 		try {
-			const { data } = await api.post("/api/auth/register", { email, password })
+			const { data } = await api.post("/api/auth/register", { fullName, email, password })
 			login(data.token, data.refreshToken, data.user)
 			navigate("/dashboard", { state: { fromRegister: true } })
 		} catch (err: any) {
@@ -150,6 +152,30 @@ export default function Register() {
 									{errors.form}
 								</div>
 							)}
+
+							<div className="space-y-2">
+								<label
+									htmlFor="reg-fullname"
+									className="text-sm font-medium text-foreground"
+								>
+									Full Name
+								</label>
+								<Input
+									id="reg-fullname"
+									type="text"
+									placeholder="John Doe"
+									value={fullName}
+									onChange={(e) => {
+										setFullName(e.target.value)
+										if (errors.fullName) setErrors({ ...errors, fullName: undefined })
+									}}
+									className={errors.fullName ? "border-destructive focus-visible:ring-destructive" : ""}
+									required
+								/>
+								{errors.fullName && (
+									<p className="text-xs font-medium text-destructive">{errors.fullName}</p>
+								)}
+							</div>
 
 							<div className="space-y-2">
 								<label

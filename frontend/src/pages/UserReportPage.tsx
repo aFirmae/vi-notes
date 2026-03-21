@@ -42,7 +42,7 @@ interface SessionReport {
 }
 
 interface UserReportPayload {
-	user: { _id: string; email: string; createdAt: string }
+	user: { _id: string; fullName: string; email: string; createdAt: string }
 	reports: SessionReport[]
 	aggregate: AggregateData | null
 }
@@ -124,7 +124,8 @@ export default function UserReportPage() {
 					<div className="h-5 w-px bg-border" />
 					<div className="flex items-center gap-2">
 						<User className="size-4 text-muted-foreground" />
-						<span className="text-base font-semibold tracking-tight">{user.email}</span>
+						<span className="text-base font-semibold tracking-tight">{user.fullName || user.email}</span>
+						{user.fullName && <span className="text-sm text-muted-foreground">({user.email})</span>}
 					</div>
 				</div>
 			</header>

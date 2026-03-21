@@ -13,6 +13,7 @@ import { api } from "@/services/api"
 
 interface UserWithReports {
 	_id: string
+	fullName: string
 	email: string
 	createdAt: string
 	sessionCount: number
@@ -75,8 +76,9 @@ export default function UsersPage() {
 						{users.map((u) => (
 							<Card key={u._id} className="shadow-sm transition-shadow hover:shadow-md flex flex-col">
 								<CardHeader className="pb-4">
-									<CardTitle className="truncate text-base">{u.email}</CardTitle>
+									<CardTitle className="truncate text-base">{u.fullName || u.email}</CardTitle>
 									<CardDescription className="truncate text-xs">
+										{u.fullName && <span>{u.email} • </span>}
 										Joined {new Date(u.createdAt).toLocaleDateString()}
 									</CardDescription>
 								</CardHeader>

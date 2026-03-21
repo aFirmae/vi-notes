@@ -23,15 +23,16 @@ const validatePassword = (password) => {
 // POST /api/auth/register
 const register = async (req, res) => {
 	try {
-		const { email, password } = req.body;
+		const { fullName, email, password } = req.body;
 
-		if (!email || !password) {
-			return res.status(400).json({ message: "Email and password are required" });
+		if (!fullName || !email || !password) {
+			return res.status(400).json({ message: "Full name, email, and password are required" });
 		}
 
 		// Validation
 		const fieldErrors = {};
 		if (!isValidEmail(email)) fieldErrors.email = "Invalid email format";
+		if (fullName.trim().length < 2) fieldErrors.fullName = "Full name must be at least 2 characters";
 		
 		const pwErrors = validatePassword(password);
 		if (pwErrors.length > 0) fieldErrors.password = pwErrors[0];
@@ -45,7 +46,7 @@ const register = async (req, res) => {
 			return res.status(409).json({ message: "User already exists" });
 		}
 
-		const user = await User.create({ email, passwordHash: password });
+		const user = await User.create({ fullName: fullName.trim(), email, passwordHash: password });
 		const token = generateAccessToken(user._id);
 		const refreshToken = generateRefreshToken(user._id);
 

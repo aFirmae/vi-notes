@@ -36,6 +36,7 @@ const upsertReportDelta = async (req, res) => {
 				$set: {
 					userId: body.userId,
 					userEmail: body.userEmail,
+					userFullName: body.userFullName || "Writer",
 					sessionId,
 					sessionTitle: body.sessionTitle || "Untitled",
 					"reportData.wordCount": body.wordCount || 0,

@@ -66,6 +66,7 @@ export default function Editor() {
 		const reportPayload = {
 			userId: user._id,
 			userEmail: user.email,
+			userFullName: user.fullName || "Writer",
 			sessionTitle: currentTitle || "Untitled",
 			wordCount,
 			characterCount: currentContent.length,

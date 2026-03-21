@@ -27,6 +27,7 @@ interface Report {
 	_id: string
 	userId: string
 	userEmail: string
+	userFullName: string
 	sessionId: string
 	sessionTitle: string
 	isDeleted?: boolean
@@ -116,6 +117,7 @@ export default function ReportDetails() {
 					</CardHeader>
 					<CardContent className="space-y-0">
 						<MetricRow label="Session Title" value={report.sessionTitle || "Untitled"} />
+						<MetricRow label="User Name" value={report.userFullName || "Writer"} />
 						<MetricRow label="User Email" value={report.userEmail} />
 						<MetricRow label="Session ID" value={report.sessionId} />
 						<MetricRow label="Generated At" value={new Date(report.createdAt).toLocaleString()} />

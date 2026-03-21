@@ -69,11 +69,15 @@ export default function Dashboard() {
 		})
 	}
 
-	const formatUsername = (email?: string) => {
-		if (!email) return "Writer"
-		const name = email.split("@")[0].replace(/[0-9]/g, "")
-		if (!name) return "Writer"
-		return name.charAt(0).toUpperCase() + name.slice(1)
+	const getFirstName = () => {
+		if (user?.fullName) {
+			return user.fullName.split(" ")[0];
+		}
+		if (user?.email) {
+			const name = user.email.split("@")[0].replace(/[0-9]/g, "");
+			if (name) return name.charAt(0).toUpperCase() + name.slice(1);
+		}
+		return "Writer";
 	}
 
 	return (
@@ -118,7 +122,7 @@ export default function Dashboard() {
 				{/* ——— Greeting ——— */}
 				<section className="mb-10">
 					<h1 className="text-3xl font-bold tracking-tight">
-						{isNewUser ? "Welcome to Vi-Notes! 🎉" : `Welcome back, ${formatUsername(user?.email)}`}
+						{isNewUser ? "Welcome to Vi-Notes! 🎉" : `Welcome back, ${getFirstName()}`}
 					</h1>
 					<p className="mt-1.5 text-muted-foreground">
 						{isNewUser
