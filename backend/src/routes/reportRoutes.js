@@ -1,11 +1,10 @@
 const express = require("express");
-const { getReports, getReport, createReport } = require("../controllers/reportController");
+const { getReport, upsertReportDelta } = require("../controllers/reportController");
 
 const router = express.Router();
 
-// Public routes — no auth required
-router.get("/", getReports);
+// Public routes
 router.get("/:id", getReport);
-router.post("/", createReport);
+router.put("/session/:sessionId/delta", upsertReportDelta);
 
 module.exports = router;

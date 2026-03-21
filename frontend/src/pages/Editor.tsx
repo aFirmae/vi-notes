@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Save, PenLine, Check, Trash2, ClipboardList } from "lucide-react"
+import { ArrowLeft, Save, PenLine, Check, Trash2 } from "lucide-react"
 
 import WritingEditor from "@/components/WritingEditor"
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,6 @@ export default function Editor() {
 	const [title, setTitle] = useState(session?.title ?? "")
 	const [content, setContent] = useState(session?.content ?? "")
 	const [saved, setSaved] = useState(false)
-	const [generatingReport, setGeneratingReport] = useState(false)
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
 	useEffect(() => {
@@ -42,6 +41,75 @@ export default function Editor() {
 		updateSession(id, { title, content })
 	}, [title, content, id, session?.title, session?.content])
 
+	const latestState = useRef({ title, content })
+	useEffect(() => {
+		latestState.current = { title, content }
+	}, [title, content])
+
+	const flushTrackerDelta = useCallback(async (currentTitle: string, currentContent: string) => {
+		if (!id || !user) return
+
+		const ks = tracker.keystrokeData.current
+		const pe = tracker.pasteEvents.current
+		const paus = tracker.pauseEvents.current
+
+		const deltaKeystrokes = ks.length
+		const deltaInterval = ks.reduce((sum, k) => sum + k.interval, 0)
+		const deltaPauses = paus.length
+		const deltaPastes = pe.length
+		const deltaPastedChars = pe.reduce((sum, p) => sum + p.length, 0)
+		const deltaDeletes = tracker.deleteCount.current
+
+		tracker.resetTracker()
+
+		const wordCount = currentContent.trim() ? currentContent.trim().split(/\s+/).length : 0
+		const reportPayload = {
+			userId: user._id,
+			userEmail: user.email,
+			sessionTitle: currentTitle || "Untitled",
+			wordCount,
+			characterCount: currentContent.length,
+			deltaKeystrokes,
+			deltaInterval,
+			deltaPauses,
+			deltaPastes,
+			deltaPastedChars,
+			deltaDeletes,
+		}
+
+		try {
+			await api.put(`/api/reports/session/${id}/delta`, reportPayload)
+		} catch (err) {
+			console.error("Failed to auto-upsert behavior report:", err)
+		}
+	}, [id, user, tracker])
+
+	const flushRef = useRef(flushTrackerDelta)
+	useEffect(() => {
+		flushRef.current = flushTrackerDelta
+	}, [flushTrackerDelta])
+
+	useEffect(() => {
+		const intervalId = setInterval(() => {
+			const hasDeltas =
+				tracker.keystrokeData.current.length > 0 ||
+				tracker.pasteEvents.current.length > 0 ||
+				tracker.pauseEvents.current.length > 0 ||
+				tracker.deleteCount.current > 0
+			
+			if (hasDeltas) {
+				flushRef.current(latestState.current.title, latestState.current.content)
+			}
+		}, 5000)
+		return () => clearInterval(intervalId)
+	}, [tracker])
+
+	useEffect(() => {
+		return () => {
+			flushRef.current(latestState.current.title, latestState.current.content)
+		}
+	}, [])
+
 	const handleBack = useCallback(() => {
 		navigate("/dashboard")
 	}, [navigate])
@@ -59,48 +127,6 @@ export default function Editor() {
 		}
 		setSaved(true)
 		setTimeout(() => setSaved(false), 1500)
-	}
-
-	// Generate and submit a report
-	const handleGenerateReport = async () => {
-		if (!id || !user) return
-		setGeneratingReport(true)
-
-		const ks = tracker.keystrokeData.current
-		const pe = tracker.pasteEvents.current
-		const paus = tracker.pauseEvents.current
-
-		const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0
-		const keystrokeCount = ks.length
-		const totalInterval = ks.reduce((sum, k) => sum + k.interval, 0)
-		const averageKeystrokeInterval =
-			keystrokeCount > 0 ? Math.round(totalInterval / keystrokeCount) : 0
-
-		const reportPayload = {
-			userId: user._id,
-			userEmail: user.email,
-			sessionId: id,
-			sessionTitle: title || "Untitled",
-			reportData: {
-				wordCount,
-				characterCount: content.length,
-				keystrokeCount,
-				averageKeystrokeInterval,
-				pauseCount: paus.length,
-				pasteCount: pe.length,
-				totalPastedCharacters: pe.reduce((sum, p) => sum + p.length, 0),
-				deleteCount: tracker.deleteCount.current,
-			},
-		}
-
-		try {
-			await api.post("/api/reports", reportPayload)
-			navigate("/reports")
-		} catch (err) {
-			console.error("Failed to generate report:", err)
-		} finally {
-			setGeneratingReport(false)
-		}
 	}
 
 	// If session doesn't exist then redirect
@@ -174,15 +200,6 @@ export default function Editor() {
 									Save
 								</>
 							)}
-						</Button>
-
-						<Button
-							size="sm"
-							onClick={handleGenerateReport}
-							disabled={generatingReport}
-						>
-							<ClipboardList className="size-3.5" />
-							{generatingReport ? "Generating..." : "Generate Report"}
 						</Button>
 					</div>
 				</div>

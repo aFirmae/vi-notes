@@ -1,4 +1,5 @@
 const Session = require("../models/Session");
+const Report = require("../models/Report");
 
 // POST /api/sessions
 const createSession = async (req, res) => {
@@ -84,6 +85,12 @@ const deleteSession = async (req, res) => {
 		if (!session) {
 			return res.status(404).json({ message: "Session not found" });
 		}
+
+		// Soft delete the behaviour report to retain history
+		await Report.findOneAndUpdate(
+			{ sessionId: req.params.id },
+			{ isDeleted: true }
+		);
 
 		res.json({ message: "Session deleted" });
 	} catch (error) {

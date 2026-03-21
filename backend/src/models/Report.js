@@ -12,19 +12,22 @@ const reportSchema = new mongoose.Schema(
 			required: true,
 		},
 		sessionId: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "Session",
+			type: String,
 			required: true,
 		},
 		sessionTitle: {
 			type: String,
 			default: "Untitled",
 		},
+		isDeleted: {
+			type: Boolean,
+			default: false,
+		},
 		reportData: {
 			wordCount: { type: Number, default: 0 },
 			characterCount: { type: Number, default: 0 },
 			keystrokeCount: { type: Number, default: 0 },
-			averageKeystrokeInterval: { type: Number, default: 0 },
+			totalInterval: { type: Number, default: 0 },
 			pauseCount: { type: Number, default: 0 },
 			pasteCount: { type: Number, default: 0 },
 			totalPastedCharacters: { type: Number, default: 0 },
@@ -33,5 +36,7 @@ const reportSchema = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+
+reportSchema.index({ sessionId: 1 }, { unique: true });
 
 module.exports = mongoose.model("Report", reportSchema);

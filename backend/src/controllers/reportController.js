@@ -1,52 +1,63 @@
 const Report = require("../models/Report");
 
-// GET /api/reports — all reports
-const getReports = async (req, res) => {
-	try {
-		const reports = await Report.find().sort({ createdAt: -1 });
-		res.json(reports);
-	} catch (error) {
-		console.error("getReports error:", error.message);
-		res.status(500).json({ message: "Server error" });
-	}
-};
-
-// GET /api/reports/:id — single report
+// GET /api/reports/:id
 const getReport = async (req, res) => {
 	try {
 		const report = await Report.findById(req.params.id);
 		if (!report) {
 			return res.status(404).json({ message: "Report not found" });
 		}
-		res.json(report);
+
+		const json = report.toJSON();
+		const ks = json.reportData?.keystrokeCount || 0;
+		const ti = json.reportData?.totalInterval || 0;
+		json.reportData.averageKeystrokeInterval = ks > 0 ? Math.round(ti / ks) : 0;
+
+		res.json(json);
 	} catch (error) {
 		console.error("getReport error:", error.message);
 		res.status(500).json({ message: "Server error" });
 	}
 };
 
-// POST /api/reports — create report
-const createReport = async (req, res) => {
+// PUT /api/reports/session/:sessionId/delta
+const upsertReportDelta = async (req, res) => {
 	try {
-		const { userId, userEmail, sessionId, sessionTitle, reportData } = req.body;
+		const { sessionId } = req.params;
+		const body = req.body;
 
-		if (!userId || !userEmail || !sessionId) {
-			return res.status(400).json({ message: "userId, userEmail, and sessionId are required" });
+		if (!body.userId || !body.userEmail) {
+			return res.status(400).json({ message: "userId and userEmail are required" });
 		}
 
-		const report = await Report.create({
-			userId,
-			userEmail,
-			sessionId,
-			sessionTitle: sessionTitle || "Untitled",
-			reportData: reportData || {},
-		});
+		const report = await Report.findOneAndUpdate(
+			{ sessionId },
+			{
+				$set: {
+					userId: body.userId,
+					userEmail: body.userEmail,
+					sessionId,
+					sessionTitle: body.sessionTitle || "Untitled",
+					"reportData.wordCount": body.wordCount || 0,
+					"reportData.characterCount": body.characterCount || 0,
+				},
+				$inc: {
+					"reportData.keystrokeCount": body.deltaKeystrokes || 0,
+					"reportData.totalInterval": body.deltaInterval || 0,
+					"reportData.pauseCount": body.deltaPauses || 0,
+					"reportData.pasteCount": body.deltaPastes || 0,
+					"reportData.totalPastedCharacters": body.deltaPastedChars || 0,
+					"reportData.deleteCount": body.deltaDeletes || 0,
+				}
+			},
+			{ upsert: true, new: true, setDefaultsOnInsert: true }
+		);
 
-		res.status(201).json(report);
+		res.json(report);
 	} catch (error) {
-		console.error("createReport error:", error.message);
+		console.error("upsertReportDelta error:", error.message);
 		res.status(500).json({ message: "Server error" });
 	}
 };
 
-module.exports = { getReports, getReport, createReport };
+module.exports = { getReport, upsertReportDelta };

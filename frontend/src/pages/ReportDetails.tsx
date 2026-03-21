@@ -29,6 +29,7 @@ interface Report {
 	userEmail: string
 	sessionId: string
 	sessionTitle: string
+	isDeleted?: boolean
 	reportData: ReportData
 	createdAt: string
 }
@@ -74,8 +75,8 @@ export default function ReportDetails() {
 			<div className="flex min-h-screen items-center justify-center bg-background">
 				<div className="text-center">
 					<p className="text-muted-foreground">{error ?? "Report not found."}</p>
-					<Button variant="outline" className="mt-4" onClick={() => navigate("/reports")}>
-						Back to Reports
+					<Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+						Back
 					</Button>
 				</div>
 			</div>
@@ -89,13 +90,20 @@ export default function ReportDetails() {
 			{/* Header */}
 			<header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-lg">
 				<div className="mx-auto flex h-16 max-w-4xl items-center gap-4 px-6">
-					<Button variant="ghost" size="icon-sm" onClick={() => navigate("/reports")}>
+					<Button variant="ghost" size="icon-sm" onClick={() => navigate(-1)}>
 						<ArrowLeft className="size-4" />
 					</Button>
 					<div className="h-5 w-px bg-border" />
-					<span className="truncate text-base font-semibold tracking-tight">
-						{report.sessionTitle || "Untitled"} — Report
-					</span>
+					<div className="flex items-center gap-2">
+						<h1 className={`text-base font-semibold tracking-tight ${report.isDeleted ? 'line-through text-muted-foreground' : ''}`}>
+							{report.sessionTitle || "Untitled"}
+						</h1>
+						{report.isDeleted && (
+							<span className="text-[10px] uppercase font-bold tracking-widest text-[#ef4444] bg-[#ef4444]/10 px-2 py-0.5 rounded">
+								Deleted
+							</span>
+						)}
+					</div>
 				</div>
 			</header>
 

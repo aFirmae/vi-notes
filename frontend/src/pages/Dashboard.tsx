@@ -9,6 +9,7 @@ import {
 	LetterText,
 	Notebook,
 	Trash2,
+	Users,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -89,15 +90,27 @@ export default function Dashboard() {
 						</span>
 					</div>
 
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => logout()}
-						className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-					>
-						<LogOut className="size-4" />
-						Sign Out
-					</Button>
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => navigate("/users")}
+							className="hidden sm:flex"
+						>
+							<Users className="size-4 mr-2" />
+							Active Writers
+						</Button>
+
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => logout()}
+							className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+						>
+							<LogOut className="size-4 mr-2" />
+							Sign Out
+						</Button>
+					</div>
 				</div>
 			</header>
 
