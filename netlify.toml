@@ -1,0 +1,21 @@
+[build]
+  # Install dependencies, build frontend, and set up serverless functions
+  command = "npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build"
+  
+  # Serve the frontend distribution folder
+  publish = "frontend/dist"
+  
+  # Serve backend code as serverless functions
+  functions = "backend/src"
+
+# This proxies all `/api/...` frontend requests straight to the express app serverless function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server/api/:splat"
+  status = 200
+
+# React Router catch-all redirect (must be at the bottom)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
