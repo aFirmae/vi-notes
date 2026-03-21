@@ -47,7 +47,10 @@ export default function Editor() {
 	}
 
 	// Save feedback
-	const handleSave = () => {
+	const handleSave = async () => {
+		if (id) {
+			await updateSession(id, { title, content })
+		}
 		setSaved(true)
 		setTimeout(() => setSaved(false), 1500)
 	}
