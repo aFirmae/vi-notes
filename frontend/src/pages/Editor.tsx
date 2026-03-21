@@ -1,22 +1,28 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Save, PenLine, Check, Trash2 } from "lucide-react"
+import { ArrowLeft, Save, PenLine, Check, Trash2, ClipboardList } from "lucide-react"
 
 import WritingEditor from "@/components/WritingEditor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSession } from "@/context/SessionContext"
+import { useAuth } from "@/context/AuthContext"
+import { useTypingTracker } from "@/hooks/useTypingTracker"
+import { api } from "@/services/api"
 
 export default function Editor() {
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
 	const { getSession, updateSession, deleteSession } = useSession()
+	const { user } = useAuth()
+	const tracker = useTypingTracker()
 
 	const session = id ? getSession(id) : undefined
 
 	const [title, setTitle] = useState(session?.title ?? "")
 	const [content, setContent] = useState(session?.content ?? "")
 	const [saved, setSaved] = useState(false)
+	const [generatingReport, setGeneratingReport] = useState(false)
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
 	useEffect(() => {
@@ -53,6 +59,48 @@ export default function Editor() {
 		}
 		setSaved(true)
 		setTimeout(() => setSaved(false), 1500)
+	}
+
+	// Generate and submit a report
+	const handleGenerateReport = async () => {
+		if (!id || !user) return
+		setGeneratingReport(true)
+
+		const ks = tracker.keystrokeData.current
+		const pe = tracker.pasteEvents.current
+		const paus = tracker.pauseEvents.current
+
+		const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0
+		const keystrokeCount = ks.length
+		const totalInterval = ks.reduce((sum, k) => sum + k.interval, 0)
+		const averageKeystrokeInterval =
+			keystrokeCount > 0 ? Math.round(totalInterval / keystrokeCount) : 0
+
+		const reportPayload = {
+			userId: user._id,
+			userEmail: user.email,
+			sessionId: id,
+			sessionTitle: title || "Untitled",
+			reportData: {
+				wordCount,
+				characterCount: content.length,
+				keystrokeCount,
+				averageKeystrokeInterval,
+				pauseCount: paus.length,
+				pasteCount: pe.length,
+				totalPastedCharacters: pe.reduce((sum, p) => sum + p.length, 0),
+				deleteCount: tracker.deleteCount.current,
+			},
+		}
+
+		try {
+			await api.post("/api/reports", reportPayload)
+			navigate("/reports")
+		} catch (err) {
+			console.error("Failed to generate report:", err)
+		} finally {
+			setGeneratingReport(false)
+		}
 	}
 
 	// If session doesn't exist then redirect
@@ -127,13 +175,29 @@ export default function Editor() {
 								</>
 							)}
 						</Button>
+
+						<Button
+							size="sm"
+							onClick={handleGenerateReport}
+							disabled={generatingReport}
+						>
+							<ClipboardList className="size-3.5" />
+							{generatingReport ? "Generating..." : "Generate Report"}
+						</Button>
 					</div>
 				</div>
 			</header>
 
 			{/* ——— Editor area ——— */}
 			<main className="flex flex-1 justify-center px-6 py-10 animate-fade-in">
-				<WritingEditor value={content} onChange={setContent} textareaRef={textareaRef} />
+				<WritingEditor
+					value={content}
+					onChange={setContent}
+					textareaRef={textareaRef}
+					onKeyDown={tracker.onKeyDown}
+					onKeyUp={tracker.onKeyUp}
+					onPaste={tracker.onPaste}
+				/>
 			</main>
 		</div>
 	)

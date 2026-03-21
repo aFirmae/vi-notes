@@ -7,6 +7,8 @@ import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Dashboard from "./pages/Dashboard"
 import Editor from "./pages/Editor"
+import Reports from "./pages/Reports"
+import ReportDetails from "./pages/ReportDetails"
 
 function App() {
 	return (
@@ -17,6 +19,8 @@ function App() {
 						{/* Public Routes */}
 						<Route path="/" element={<Login />} />
 						<Route path="/register" element={<Register />} />
+						<Route path="/reports" element={<Reports />} />
+						<Route path="/report/:id" element={<ReportDetails />} />
 						
 						{/* Protected Routes */}
 						<Route element={<ProtectedRoute />}>

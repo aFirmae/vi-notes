@@ -8,9 +8,12 @@ interface WritingEditorProps {
 	value: string
 	onChange: (value: string) => void
 	textareaRef?: Ref<HTMLTextAreaElement>
+	onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+	onKeyUp?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+	onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void
 }
 
-export default function WritingEditor({ value, onChange, textareaRef }: WritingEditorProps) {
+export default function WritingEditor({ value, onChange, textareaRef, onKeyDown, onKeyUp, onPaste }: WritingEditorProps) {
 	const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0
 
 	return (
@@ -23,6 +26,9 @@ export default function WritingEditor({ value, onChange, textareaRef }: WritingE
 						placeholder="Start writing..."
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
+						onKeyDown={onKeyDown}
+						onKeyUp={onKeyUp}
+						onPaste={onPaste}
 					/>
 				</CardContent>
 			</Card>
