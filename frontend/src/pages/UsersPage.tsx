@@ -57,7 +57,12 @@ export default function UsersPage() {
 					</p>
 				</div>
 
-				{loading && <p className="text-center text-muted-foreground">Loading users...</p>}
+				{loading && (
+					<div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
+						<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
+						<p className="text-sm text-muted-foreground">Loading active writers...</p>
+					</div>
+				)}
 				{error && <p className="text-center text-destructive">{error}</p>}
 				{!loading && !error && users.length === 0 && (
 					<div className="flex flex-col items-center justify-center py-24 text-center">

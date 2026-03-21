@@ -81,7 +81,12 @@ export default function UserReportPage() {
 	}, [userId])
 
 	if (loading) {
-		return <div className="flex min-h-screen items-center justify-center bg-background"><p className="text-muted-foreground">Loading reports...</p></div>
+		return (
+			<div className="flex min-h-screen flex-col items-center justify-center bg-background animate-fade-in-up">
+				<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
+				<p className="text-sm text-muted-foreground tracking-tight">Loading behavior aggregate...</p>
+			</div>
+		)
 	}
 	if (error || !data) {
 		return (

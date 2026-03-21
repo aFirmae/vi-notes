@@ -65,8 +65,9 @@ export default function ReportDetails() {
 
 	if (loading) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-background">
-				<p className="text-muted-foreground">Loading report...</p>
+			<div className="flex min-h-screen flex-col items-center justify-center bg-background animate-fade-in-up">
+				<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
+				<p className="text-sm text-muted-foreground tracking-tight">Loading session details...</p>
 			</div>
 		)
 	}
