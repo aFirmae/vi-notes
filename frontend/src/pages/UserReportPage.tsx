@@ -94,15 +94,15 @@ export default function UserReportPage() {
 	}
 
 	const { user, reports, aggregate } = data
-	const reportsByCreatedAtAsc = [...reports].sort(
+	const reportsBy = [...reports].sort(
 		(a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
 	)
-	const sessionLabelByReportId = new Map(
-		reportsByCreatedAtAsc.map((report, index) => [report._id, `Session ${index + 1}`]),
+	const sessionLabels = new Map(
+		reportsBy.map((report, index) => [report._id, `Session ${index + 1}`]),
 	)
 
 	// Chart Data
-	const chartData = reportsByCreatedAtAsc.map((r, i) => ({
+	const chartData = reportsBy.map((r, i) => ({
 		name: `${i + 1}`,
 		sessionLabel: `Session ${i + 1}`,
 		words: r.reportData.wordCount,
@@ -123,7 +123,7 @@ export default function UserReportPage() {
 		deletes: { label: "Deletes / Backspaces", color: "var(--color-chart-4)" },
 	}
 
-	const renderSessionTooltip = (
+	const tooltipContent = (
 		<ChartTooltipContent
 			labelFormatter={(_, payload) => {
 				const label = payload?.[0]?.payload?.sessionLabel
@@ -186,7 +186,7 @@ export default function UserReportPage() {
 											<CartesianGrid vertical={false} strokeDasharray="3 3" />
 											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
 											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-											<ChartTooltip cursor={false} content={renderSessionTooltip} />
+											<ChartTooltip cursor={false} content={tooltipContent} />
 											<Line type="monotone" dataKey="chars" stroke="var(--color-chars)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
 										</LineChart>
 									</ChartContainer>
@@ -205,7 +205,7 @@ export default function UserReportPage() {
 											<CartesianGrid vertical={false} strokeDasharray="3 3" />
 											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
 											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-											<ChartTooltip cursor={false} content={renderSessionTooltip} />
+											<ChartTooltip cursor={false} content={tooltipContent} />
 											<Line type="monotone" dataKey="pastedChars" stroke="var(--color-pastedChars)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
 										</LineChart>
 									</ChartContainer>
@@ -224,7 +224,7 @@ export default function UserReportPage() {
 											<CartesianGrid vertical={false} strokeDasharray="3 3" />
 											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
 											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-											<ChartTooltip cursor={false} content={renderSessionTooltip} />
+											<ChartTooltip cursor={false} content={tooltipContent} />
 											<Line type="monotone" dataKey="keystrokes" stroke="var(--color-keystrokes)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
 										</LineChart>
 									</ChartContainer>
@@ -243,7 +243,7 @@ export default function UserReportPage() {
 											<CartesianGrid vertical={false} strokeDasharray="3 3" />
 											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
 											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-											<ChartTooltip cursor={false} content={renderSessionTooltip} />
+											<ChartTooltip cursor={false} content={tooltipContent} />
 											<Line type="monotone" dataKey="deletes" stroke="var(--color-deletes)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
 										</LineChart>
 									</ChartContainer>
@@ -260,7 +260,7 @@ export default function UserReportPage() {
 										<div>
 											<div className="flex items-center gap-2">
 												<h4 className={`font-semibold text-base ${report.isDeleted ? 'line-through text-muted-foreground' : ''}`}>
-													{sessionLabelByReportId.get(report._id) || "Session"}
+													{sessionLabels.get(report._id) || "Session"}
 												</h4>
 												{report.isDeleted && (
 													<span className="text-[10px] uppercase font-bold tracking-widest text-[#ef4444] bg-[#ef4444]/10 px-2 py-0.5 rounded">
@@ -275,7 +275,7 @@ export default function UserReportPage() {
 										<Button asChild size="sm" variant="outline" className="shrink-0">
 											<Link
 												to={`/report/${report._id}`}
-												state={{ sessionLabel: sessionLabelByReportId.get(report._id) || "Session" }}
+												state={{ sessionLabel: sessionLabels.get(report._id) || "Session" }}
 											>
 												View Details
 											</Link>

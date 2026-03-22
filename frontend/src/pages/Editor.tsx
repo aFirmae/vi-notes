@@ -46,7 +46,7 @@ export default function Editor() {
 		latestState.current = { title, content }
 	}, [title, content])
 
-	const flushTrackerDelta = useCallback(async (currentTitle: string, currentContent: string) => {
+	const flushDelta = useCallback(async (currentTitle: string, currentContent: string) => {
 		if (!id || !user) return
 
 		const ks = tracker.keystrokeBuffer.current
@@ -63,7 +63,7 @@ export default function Editor() {
 		tracker.resetTracker()
 
 		const wordCount = currentContent.trim() ? currentContent.trim().split(/\s+/).length : 0
-		const reportPayload = {
+		const payload = {
 			userId: user._id,
 			userEmail: user.email,
 			userFullName: user.fullName || "Writer",
@@ -79,16 +79,16 @@ export default function Editor() {
 		}
 
 		try {
-			await api.put(`/api/reports/session/${id}/delta`, reportPayload)
+			await api.put(`/api/reports/session/${id}/delta`, payload)
 		} catch (err) {
 			console.error("Failed to auto-upsert behavior report:", err)
 		}
 	}, [id, user, tracker])
 
-	const flushRef = useRef(flushTrackerDelta)
+	const flushRef = useRef(flushDelta)
 	useEffect(() => {
-		flushRef.current = flushTrackerDelta
-	}, [flushTrackerDelta])
+		flushRef.current = flushDelta
+	}, [flushDelta])
 
 	useEffect(() => {
 		const intervalId = setInterval(() => {

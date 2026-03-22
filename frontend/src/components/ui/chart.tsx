@@ -315,7 +315,7 @@ function getPayloadConfigFromPayload(
     return undefined
   }
 
-  const payloadPayload =
+  const payloadData =
     "payload" in payload &&
     typeof payload.payload === "object" &&
     payload.payload !== null
@@ -330,12 +330,12 @@ function getPayloadConfigFromPayload(
   ) {
     configLabelKey = payload[key as keyof typeof payload] as string
   } else if (
-    payloadPayload &&
-    key in payloadPayload &&
-    typeof payloadPayload[key as keyof typeof payloadPayload] === "string"
+    payloadData &&
+    key in payloadData &&
+    typeof payloadData[key as keyof typeof payloadData] === "string"
   ) {
-    configLabelKey = payloadPayload[
-      key as keyof typeof payloadPayload
+    configLabelKey = payloadData[
+      key as keyof typeof payloadData
     ] as string
   }
 

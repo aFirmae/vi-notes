@@ -38,7 +38,7 @@ export function useTypingTracker(): TypingTrackerResult {
 	// Internal timing refs
 	const lastKeyDownTime = useRef<number | null>(null)
 	const lastKeyUpTime = useRef<number | null>(null)
-	const pendingKeyDownTime = useRef<number | null>(null)
+	const keyDownAtRef = useRef<number | null>(null)
 
 	const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		const now = Date.now()
@@ -56,12 +56,12 @@ export function useTypingTracker(): TypingTrackerResult {
 			}
 		}
 
-		pendingKeyDownTime.current = now
+		keyDownAtRef.current = now
 	}, [])
 
 	const onKeyUp = useCallback((_e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		const now = Date.now()
-		const keyDownTime = pendingKeyDownTime.current
+		const keyDownTime = keyDownAtRef.current
 
 		if (keyDownTime !== null) {
 			const interval =
@@ -75,7 +75,7 @@ export function useTypingTracker(): TypingTrackerResult {
 
 			lastKeyDownTime.current = keyDownTime
 			lastKeyUpTime.current = now
-			pendingKeyDownTime.current = null
+			keyDownAtRef.current = null
 		}
 	}, [])
 
@@ -94,7 +94,7 @@ export function useTypingTracker(): TypingTrackerResult {
 		deleteCount.current = 0
 		lastKeyDownTime.current = null
 		lastKeyUpTime.current = null
-		pendingKeyDownTime.current = null
+		keyDownAtRef.current = null
 	}, [])
 
 	return {

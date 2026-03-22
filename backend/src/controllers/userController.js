@@ -5,9 +5,9 @@ const Report = require("../models/Report");
 const getUsersWithReports = async (req, res) => {
 	try {
 		const s = req.query.s;
-		const userIdsWithReports = await Report.distinct("userId");
+		const reportUserIds = await Report.distinct("userId");
 
-		const query = { _id: { $in: userIdsWithReports } };
+		const query = { _id: { $in: reportUserIds } };
 		if (s) {
 			query.$or = [
 				{ fullName: { $regex: s, $options: "i" } },
@@ -20,7 +20,7 @@ const getUsersWithReports = async (req, res) => {
 		);
 
 		const userCounts = await Report.aggregate([
-			{ $match: { userId: { $in: userIdsWithReports } } },
+			{ $match: { userId: { $in: reportUserIds } } },
 			{ $group: { _id: "$userId", sessionCount: { $sum: 1 } } },
 		]);
 
