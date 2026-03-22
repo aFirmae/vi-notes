@@ -27,7 +27,7 @@ export default function Dashboard() {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const { user, logout } = useAuth()
-	const { sessions, addSession, deleteSession, isLoading } = useSession()
+	const { sessions, deleteSession, isLoading } = useSession()
 
 	const isNewUser = (location.state as { fromRegister?: boolean })?.fromRegister === true
 
@@ -46,10 +46,7 @@ export default function Dashboard() {
 	]
 
 	const handleNewSession = async () => {
-		const id = await addSession()
-		if (id) {
-			navigate(`/editor/${id}`)
-		}
+		navigate("/editor/new")
 	}
 
 	// ——— Format relative time ———

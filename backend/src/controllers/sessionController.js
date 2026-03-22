@@ -92,12 +92,8 @@ const deleteSession = async (req, res) => {
 
 		const report = await Report.findOne({ sessionId: req.params.id });
 		if (report) {
-			if (report.reportData && report.reportData.keystrokeCount === 0) {
-				await Report.deleteOne({ _id: report._id });
-			} else {
-				report.isDeleted = true;
-				await report.save();
-			}
+			report.isDeleted = true;
+			await report.save();
 		}
 
 		res.json({ message: "Session archived" });

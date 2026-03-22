@@ -34,7 +34,7 @@ type SessionAction =
 
 interface SessionContextValue extends SessionState {
 	fetchSessions: () => Promise<void>
-	addSession: () => Promise<string | undefined>
+	addSession: (data?: Partial<Pick<Session, "title" | "content">>) => Promise<string | undefined>
 	updateSession: (_id: string, data: Partial<Omit<Session, "_id">>) => Promise<void>
 	deleteSession: (id: string) => Promise<void>
 	getSession: (id: string) => Session | undefined
@@ -106,11 +106,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 		}
 	}, [isAuthenticated, fetchSessions])
 
-	const addSession = async (): Promise<string | undefined> => {
+	const addSession = async (data?: Partial<Pick<Session, "title" | "content">>): Promise<string | undefined> => {
 		try {
-			const { data } = await api.post("/api/sessions", { title: "", content: "" })
-			dispatch({ type: "ADD_SESSION", payload: data })
-			return data._id
+			const { data: createdSession } = await api.post("/api/sessions", {
+				title: data?.title ?? "",
+				content: data?.content ?? "",
+			})
+			dispatch({ type: "ADD_SESSION", payload: createdSession })
+			return createdSession._id
 		} catch (err) {
 			console.error("Failed to create session:", err)
 		}

@@ -13,20 +13,34 @@ import { api } from "@/services/api"
 export default function Editor() {
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
-	const { getSession, updateSession, deleteSession } = useSession()
+	const { getSession, addSession, updateSession, deleteSession } = useSession()
 	const { user } = useAuth()
 	const tracker = useTypingTracker()
 
-	const session = id ? getSession(id) : undefined
+	const isNewDraft = !id || id === "new"
+	const [sessionId, setSessionId] = useState<string | undefined>(isNewDraft ? undefined : id)
+	const session = sessionId ? getSession(sessionId) : undefined
 
 	const [title, setTitle] = useState(session?.title ?? "")
 	const [content, setContent] = useState(session?.content ?? "")
 	const [saved, setSaved] = useState(false)
+	const hasAnyKeystrokeRef = useRef(false)
+	const creatingSessionRef = useRef(false)
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+	const titleInputRef = useRef<HTMLInputElement | null>(null)
+
+	useEffect(() => {
+		if (!id || id === "new") {
+			setSessionId(undefined)
+			return
+		}
+		setSessionId(id)
+	}, [id])
 
 	useEffect(() => {
 		const textarea = textareaRef.current
 		if (!textarea) return
+		if (document.activeElement === titleInputRef.current) return
 
 		textarea.focus()
 		const end = textarea.value.length
@@ -35,29 +49,61 @@ export default function Editor() {
 
 	// Sync changes to context
 	useEffect(() => {
-		if (!id || !session) return
+		if (!sessionId || !session) return
 		if (title === session?.title && content === session?.content) return
 		
-		updateSession(id, { title, content })
-	}, [title, content, id, session?.title, session?.content])
+		updateSession(sessionId, { title, content })
+	}, [title, content, sessionId, session?.title, session?.content, updateSession])
 
 	const latestState = useRef({ title, content })
 	useEffect(() => {
 		latestState.current = { title, content }
 	}, [title, content])
 
+	const shouldPersistDraft = useCallback((currentTitle: string) => {
+		return hasAnyKeystrokeRef.current || currentTitle.trim().length > 0
+	}, [])
+
+	const ensureSessionExists = useCallback(async (currentTitle: string, currentContent: string) => {
+		if (sessionId || !user || creatingSessionRef.current) return sessionId
+		if (!shouldPersistDraft(currentTitle)) return undefined
+
+		creatingSessionRef.current = true
+		try {
+			const createdSessionId = await addSession({ title: currentTitle, content: currentContent })
+			if (createdSessionId) {
+				setSessionId(createdSessionId)
+				navigate(`/editor/${createdSessionId}`, { replace: true })
+			}
+			return createdSessionId
+		} finally {
+			creatingSessionRef.current = false
+		}
+	}, [sessionId, user, shouldPersistDraft, addSession, navigate])
+
+	useEffect(() => {
+		if (sessionId || !user) return
+		ensureSessionExists(title, content)
+	}, [title, content, sessionId, user, ensureSessionExists])
+
 	const flushDelta = useCallback(async (currentTitle: string, currentContent: string) => {
-		if (!id || !user) return
+		if (!user) return
 
-		const ks = tracker.keystrokeBuffer.current
-		const pe = tracker.pasteBuffer.current
-		const paus = tracker.pauseEvents.current
+		let targetSessionId = sessionId
+		if (!targetSessionId) {
+			targetSessionId = await ensureSessionExists(currentTitle, currentContent)
+		}
+		if (!targetSessionId) return
 
-		const deltaKeystrokes = ks.length
-		const deltaInterval = ks.reduce((sum, k) => sum + k.interval, 0)
-		const deltaPauses = paus.length
-		const deltaPastes = pe.length
-		const deltaPastedChars = pe.reduce((sum, p) => sum + p.length, 0)
+		const keystrokeEvents = tracker.keystrokeBuffer.current
+		const pasteEvents = tracker.pasteBuffer.current
+		const pauseEvents = tracker.pauseEvents.current
+
+		const deltaKeystrokes = keystrokeEvents.length
+		const deltaInterval = keystrokeEvents.reduce((sum, keystroke) => sum + keystroke.interval, 0)
+		const deltaPauses = pauseEvents.length
+		const deltaPastes = pasteEvents.length
+		const deltaPastedChars = pasteEvents.reduce((sum, pasteEvent) => sum + pasteEvent.length, 0)
 		const deltaDeletes = tracker.deleteCount.current
 
 		tracker.resetTracker()
@@ -79,11 +125,11 @@ export default function Editor() {
 		}
 
 		try {
-			await api.put(`/api/reports/session/${id}/delta`, payload)
+			await api.put(`/api/reports/session/${targetSessionId}/delta`, payload)
 		} catch (err) {
 			console.error("Failed to auto-upsert behavior report:", err)
 		}
-	}, [id, user, tracker])
+	}, [sessionId, user, tracker, ensureSessionExists])
 
 	const flushRef = useRef(flushDelta)
 	useEffect(() => {
@@ -116,22 +162,28 @@ export default function Editor() {
 	}, [navigate])
 
 	const handleDelete = () => {
-		if (!id) return
-		deleteSession(id)
+		if (sessionId) {
+			deleteSession(sessionId)
+		}
 		navigate("/dashboard")
 	}
 
 	// Save feedback
 	const handleSave = async () => {
-		if (id) {
-			await updateSession(id, { title, content })
+		let targetSessionId = sessionId
+		if (!targetSessionId) {
+			targetSessionId = await ensureSessionExists(title, content)
+		}
+
+		if (targetSessionId) {
+			await updateSession(targetSessionId, { title, content })
 		}
 		setSaved(true)
 		setTimeout(() => setSaved(false), 1500)
 	}
 
 	// If session doesn't exist then redirect
-	if (id && !session) {
+	if (sessionId && !session) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-background">
 				<div className="text-center animate-fade-in">
@@ -167,6 +219,7 @@ export default function Editor() {
 						<div className="flex items-center gap-2 min-w-0 flex-1">
 							<PenLine className="size-4 text-muted-foreground shrink-0" />
 							<Input
+								ref={titleInputRef}
 								value={title}
 								onChange={(e) => setTitle(e.target.value)}
 								placeholder="Untitled session"
@@ -212,7 +265,10 @@ export default function Editor() {
 					value={content}
 					onChange={setContent}
 					textareaRef={textareaRef}
-					onKeyDown={tracker.onKeyDown}
+					onKeyDown={(e) => {
+						hasAnyKeystrokeRef.current = true
+						tracker.onKeyDown(e)
+					}}
 					onKeyUp={tracker.onKeyUp}
 					onPaste={tracker.onPaste}
 				/>
