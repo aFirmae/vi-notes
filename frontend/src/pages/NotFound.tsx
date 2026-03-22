@@ -1,5 +1,6 @@
 import { gsap } from "gsap";
 import { useEffect, useRef } from "react";
+import { Codepen } from "lucide-react";
 import AstronautSVG from "../assets/Astronaut";
 
 interface NotFoundProps {
@@ -107,7 +108,7 @@ export default function NotFound({ onGoHome, homeHref = "/dashboard" }: NotFound
 				repeatDelay: 8,
 				delay: 2,
 			});
-		}, svgRef); // Scope selectors to the SVG ref
+		}, svgRef);
 
 		return () => ctx.revert();
 	}, []);
@@ -121,26 +122,22 @@ export default function NotFound({ onGoHome, homeHref = "/dashboard" }: NotFound
 
 	return (
 		<div
-			className="min-h-screen flex items-center justify-center font-sans px-4 sm:px-6 lg:px-8"
+			className="min-h-screen flex items-center justify-center font-sans px-4 sm:px-6 lg:px-8 relative overflow-hidden"
 			style={{ fontFamily: "'Nunito Sans', sans-serif", color: "#0e0620" }}
 		>
-			{/* Google Font */}
 			<link
 				rel="stylesheet"
 				href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap"
 			/>
 
-			{/* Main content */}
 			<main className="w-full max-w-7xl mx-auto py-12">
 				<div className="flex flex-col md:flex-row items-center justify-between gap-12">
-					{/* Illustration */}
 					<div className="w-full md:w-1/2 flex justify-center">
-						<div className="w-full max-w-xl">
+						<div className="w-full max-w-xl ml-15 md:ml-0">
 							<AstronautSVG ref={svgRef} />
 						</div>
 					</div>
 
-					{/* Text */}
 					<div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
 						<h1
 							className="font-extrabold leading-none mb-6 select-none"
@@ -178,6 +175,19 @@ export default function NotFound({ onGoHome, homeHref = "/dashboard" }: NotFound
 					</div>
 				</div>
 			</main>
+
+			<div className="absolute bottom-4 right-4 flex items-center gap-2 text-[#0e0620] opacity-80 hover:opacity-100 transition-opacity z-10">
+				<a
+					href="https://codepen.io/kdbkapsere/pen/oNXLbqQ"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="flex items-center gap-2 hover:underline hover:scale-105 transition-transform"
+					title="View original on CodePen"
+				>
+					<span className="text-sm font-semibold">Inspired by Kasper</span>
+					<Codepen size={20} />
+				</a>
+			</div>
 		</div>
 	);
 }
