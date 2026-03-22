@@ -163,7 +163,7 @@ export default function Register() {
 								<Input
 									id="reg-fullname"
 									type="text"
-									placeholder="John Doe"
+									placeholder="Your Name"
 									value={fullName}
 									onChange={(e) => {
 										setFullName(e.target.value)

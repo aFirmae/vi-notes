@@ -10,6 +10,7 @@ import Editor from "./pages/Editor"
 import UsersPage from "./pages/UsersPage"
 import UserReportPage from "./pages/UserReportPage"
 import ReportDetails from "./pages/ReportDetails"
+import NotFound from "./pages/NotFound"
 
 function App() {
 	return (
@@ -29,6 +30,9 @@ function App() {
 							<Route path="/dashboard" element={<Dashboard />} />
 							<Route path="/editor/:id" element={<Editor />} />
 						</Route>
+
+						{/* 404 Page */}
+						<Route path="*" element={<NotFound />} />
 					</Routes>
 				</SessionProvider>
 			</AuthProvider>
