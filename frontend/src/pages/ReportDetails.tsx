@@ -11,6 +11,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card"
 import { api } from "@/services/api"
+import NotFound from "@/pages/NotFound"
 
 interface ReportData {
 	wordCount: number
@@ -63,24 +64,15 @@ export default function ReportDetails() {
 			.finally(() => setLoading(false))
 	}, [id])
 
+	if (error || !report) {
+		return <NotFound onGoHome={() => navigate(-1)} />
+	}
+
 	if (loading) {
 		return (
 			<div className="flex min-h-screen flex-col items-center justify-center bg-background animate-fade-in-up">
 				<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
 				<p className="text-sm text-muted-foreground tracking-tight">Loading session details...</p>
-			</div>
-		)
-	}
-
-	if (error || !report) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-background">
-				<div className="text-center">
-					<p className="text-muted-foreground">{error ?? "Report not found."}</p>
-					<Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
-						Back
-					</Button>
-				</div>
 			</div>
 		)
 	}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { api } from "@/services/api"
+import NotFound from "@/pages/NotFound"
 
 // --- Types ---
 interface AggregateData {
@@ -89,14 +90,7 @@ export default function UserReportPage() {
 		)
 	}
 	if (error || !data) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-background text-center">
-				<div>
-					<p className="text-muted-foreground">{error ?? "User not found."}</p>
-					<Button variant="outline" className="mt-4" onClick={() => navigate("/dashboard")}>Back to Dashboard</Button>
-				</div>
-			</div>
-		)
+		return <NotFound homeHref="/users" />
 	}
 
 	const { user, reports, aggregate } = data
