@@ -64,10 +64,6 @@ export default function ReportDetails() {
 			.finally(() => setLoading(false))
 	}, [id])
 
-	if (error || !report) {
-		return <NotFound onGoHome={() => navigate(-1)} />
-	}
-
 	if (loading) {
 		return (
 			<div className="flex min-h-screen flex-col items-center justify-center bg-background animate-fade-in-up">
@@ -77,6 +73,10 @@ export default function ReportDetails() {
 		)
 	}
 
+	if (error || !report) {
+		return <NotFound onGoHome={() => navigate(-1)} />
+	}
+	
 	const { reportData } = report
 
 	return (
