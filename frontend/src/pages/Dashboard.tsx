@@ -99,20 +99,20 @@ export default function Dashboard() {
 							variant="outline"
 							size="sm"
 							onClick={() => navigate(`/users/${user?._id}`)}
-							className="hidden sm:flex"
+							className="flex px-2 sm:px-3"
 						>
-							<BarChart2 className="size-4 mr-2" />
-							My report
+							<BarChart2 className="size-4 sm:mr-2" />
+							<span className="hidden sm:inline">My report</span>
 						</Button>
 
 						<Button
 							variant="ghost"
 							size="sm"
 							onClick={() => logout()}
-							className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+							className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive px-2 sm:px-3"
 						>
-							<LogOut className="size-4 mr-2" />
-							Sign Out
+							<LogOut className="size-4 sm:mr-2" />
+							<span className="hidden sm:inline">Sign Out</span>
 						</Button>
 					</div>
 				</div>
@@ -134,21 +134,21 @@ export default function Dashboard() {
 				</section>
 
 				{/* ——— Stats ——— */}
-				<section className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+				<section className="mb-10 grid grid-cols-3 gap-3 sm:grid-cols-3 sm:gap-4">
 					{stats.map((s) => (
 						<Card
 							key={s.label}
 							className="shadow-sm transition-shadow hover:shadow-md"
 						>
-							<CardContent className="flex items-center gap-4 py-5">
-								<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted">
-									<s.icon className="size-5 text-foreground/70" />
+							<CardContent className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-4 p-3 sm:p-5 text-center sm:text-left">
+								<div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-muted">
+									<s.icon className="size-4 sm:size-5 text-foreground/70" />
 								</div>
 								<div>
-									<p className="text-2xl font-bold leading-none tracking-tight">
+									<p className="text-lg sm:text-2xl font-bold leading-none tracking-tight">
 										{s.value}
 									</p>
-									<p className="mt-1 text-xs font-medium text-muted-foreground">
+									<p className="mt-1 text-[10px] sm:text-xs font-medium text-muted-foreground line-clamp-1">
 										{s.label}
 									</p>
 								</div>
@@ -163,8 +163,8 @@ export default function Dashboard() {
 						<h2 className="text-xl font-semibold tracking-tight">
 							Your Writing Sessions
 						</h2>
-						<Button onClick={handleNewSession}>
-							<Plus className="size-4" />
+						<Button onClick={handleNewSession} className="hidden sm:inline-flex">
+							<Plus className="size-4 mr-2" />
 							New Session
 						</Button>
 					</div>
@@ -255,6 +255,15 @@ export default function Dashboard() {
 						</div>
 					)}
 				</section>
+
+				{/* ——— Floating Action Button (Mobile) ——— */}
+				<Button
+					onClick={handleNewSession}
+					className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-xl sm:hidden"
+					size="icon"
+				>
+					<Plus className="size-6 text-primary-foreground" />
+				</Button>
 			</main>
 		</div>
 	)

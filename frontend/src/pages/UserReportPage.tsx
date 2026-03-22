@@ -122,20 +122,20 @@ export default function UserReportPage() {
 		<div className="min-h-screen bg-background">
 			{/* Header */}
 			<header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-lg">
-				<div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-6">
-					<Button variant="ghost" size="icon-sm" onClick={() => navigate("/dashboard")}>
+				<div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4 sm:px-6">
+					<Button variant="ghost" size="icon-sm" onClick={() => navigate("/dashboard")} className="shrink-0">
 						<ArrowLeft className="size-4" />
 					</Button>
-					<div className="h-5 w-px bg-border" />
-					<div className="flex items-center gap-2">
-						<User className="size-4 text-muted-foreground" />
-						<span className="text-base font-semibold tracking-tight">{user.fullName || user.email}</span>
-						{user.fullName && <span className="text-sm text-muted-foreground">({user.email})</span>}
+					<div className="h-5 w-px bg-border shrink-0" />
+					<div className="flex flex-1 items-center gap-2 min-w-0">
+						<User className="size-4 text-muted-foreground shrink-0" />
+						<span className="text-base font-semibold tracking-tight truncate">{user.fullName || user.email}</span>
+						{user.fullName && <span className="text-sm text-muted-foreground truncate hidden sm:inline-block">({user.email})</span>}
 					</div>
 				</div>
 			</header>
 
-			<main className="mx-auto max-w-5xl space-y-8 px-6 py-10 animate-fade-in">
+			<main className="mx-auto max-w-5xl space-y-6 sm:space-y-8 px-4 sm:px-6 py-6 sm:py-10 animate-fade-in">
 				<div className="flex items-center justify-between">
 					<div>
 						<h1 className="text-2xl font-bold tracking-tight">Aggregate Behaviour Report</h1>
@@ -147,7 +147,7 @@ export default function UserReportPage() {
 				{aggregate ? (
 					<>
 						{/* Aggregate Stats */}
-						<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+						<div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
 							<StatBox label="Total Words" value={aggregate.totalWordCount.toLocaleString()} />
 							<StatBox label="Total Keystrokes" value={aggregate.totalKeystrokes.toLocaleString()} />
 							<StatBox label="Avg Speed" value={`${aggregate.avgKeystrokeInterval}ms`} sub="Interval between keys" />

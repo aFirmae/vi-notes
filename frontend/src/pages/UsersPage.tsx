@@ -37,7 +37,7 @@ export default function UsersPage() {
 		<div className="min-h-screen bg-background">
 			{/* Header */}
 			<header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-lg">
-				<div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-6">
+				<div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4 sm:px-6">
 					<Button variant="ghost" size="icon-sm" onClick={() => navigate("/dashboard")}>
 						<ArrowLeft className="size-4" />
 					</Button>
@@ -49,7 +49,7 @@ export default function UsersPage() {
 				</div>
 			</header>
 
-			<main className="mx-auto max-w-5xl px-6 py-10 animate-fade-in">
+			<main className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10 animate-fade-in">
 				<div className="mb-8">
 					<h1 className="text-2xl font-bold tracking-tight">User Reports</h1>
 					<p className="mt-1 text-sm text-muted-foreground">
@@ -77,17 +77,17 @@ export default function UsersPage() {
 				)}
 
 				{!loading && users.length > 0 && (
-					<div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="grid gap-3 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 						{users.map((u) => (
 							<Card key={u._id} className="shadow-sm transition-shadow hover:shadow-md flex flex-col">
-								<CardHeader className="pb-4">
+								<CardHeader className="pb-3 sm:pb-4 p-4 sm:p-6">
 									<CardTitle className="truncate text-base">{u.fullName || u.email}</CardTitle>
 									<CardDescription className="truncate text-xs">
 										{u.fullName && <span>{u.email} • </span>}
 										Joined {new Date(u.createdAt).toLocaleDateString()}
 									</CardDescription>
 								</CardHeader>
-								<CardContent className="flex-1 flex flex-col justify-between space-y-4">
+								<CardContent className="flex-1 flex flex-col justify-between space-y-4 p-4 sm:p-6 pt-0 sm:pt-0">
 									<div className="flex items-center justify-between text-sm">
 										<span className="text-muted-foreground">Tracked Sessions</span>
 										<span className="font-semibold">{u.sessionCount}</span>
