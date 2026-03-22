@@ -35,7 +35,7 @@ export default function Editor() {
 
 	// Sync changes to context
 	useEffect(() => {
-		if (!id) return
+		if (!id || !session) return
 		if (title === session?.title && content === session?.content) return
 		
 		updateSession(id, { title, content })

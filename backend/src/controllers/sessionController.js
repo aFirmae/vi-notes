@@ -22,7 +22,7 @@ const createSession = async (req, res) => {
 // GET /api/sessions
 const getSessions = async (req, res) => {
 	try {
-		const sessions = await Session.find({ userId: req.userId })
+		const sessions = await Session.find({ userId: req.userId, isDeleted: false })
 			.sort({ updatedAt: -1 });
 
 		res.json(sessions);
@@ -38,6 +38,7 @@ const getSession = async (req, res) => {
 		const session = await Session.findOne({
 			_id: req.params.id,
 			userId: req.userId,
+			isDeleted: false,
 		});
 
 		if (!session) {
@@ -57,7 +58,7 @@ const updateSession = async (req, res) => {
 		const { title, content } = req.body;
 
 		const session = await Session.findOneAndUpdate(
-			{ _id: req.params.id, userId: req.userId },
+			{ _id: req.params.id, userId: req.userId, isDeleted: false },
 			{ ...(title !== undefined && { title }), ...(content !== undefined && { content }) },
 			{ new: true }
 		);
@@ -76,10 +77,14 @@ const updateSession = async (req, res) => {
 // DELETE /api/sessions/:id
 const deleteSession = async (req, res) => {
 	try {
-		const session = await Session.findOneAndDelete({
+		const session = await Session.findOneAndUpdate({
 			_id: req.params.id,
 			userId: req.userId,
-		});
+			isDeleted: false,
+		}, {
+			isDeleted: true,
+			deletedAt: new Date(),
+		}, { new: true });
 
 		if (!session) {
 			return res.status(404).json({ message: "Session not found" });
@@ -95,7 +100,7 @@ const deleteSession = async (req, res) => {
 			}
 		}
 
-		res.json({ message: "Session deleted" });
+		res.json({ message: "Session archived" });
 	} catch (error) {
 		console.error("Delete session error:", error.message);
 		res.status(500).json({ message: "Server error" });

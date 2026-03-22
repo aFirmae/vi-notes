@@ -121,7 +121,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 		dispatch({ type: "UPDATE_SESSION", payload: { _id, ...data } })
 		try {
 			await api.put(`/api/sessions/${_id}`, data)
-		} catch (err) {
+		} catch (err: any) {
+			if (err?.response?.status === 404) {
+				dispatch({ type: "DELETE_SESSION", payload: _id })
+				return
+			}
 			console.error("Failed to update session on server:", err)
 			// Revert? (For now, just log error)
 		}
