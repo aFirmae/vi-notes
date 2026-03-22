@@ -93,7 +93,7 @@ export default function UserReportPage() {
 			<div className="flex min-h-screen items-center justify-center bg-background text-center">
 				<div>
 					<p className="text-muted-foreground">{error ?? "User not found."}</p>
-					<Button variant="outline" className="mt-4" onClick={() => navigate("/users")}>Back to Users</Button>
+					<Button variant="outline" className="mt-4" onClick={() => navigate("/dashboard")}>Back to Dashboard</Button>
 				</div>
 			</div>
 		)
@@ -123,7 +123,7 @@ export default function UserReportPage() {
 			{/* Header */}
 			<header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-lg">
 				<div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-6">
-					<Button variant="ghost" size="icon-sm" onClick={() => navigate("/users")}>
+					<Button variant="ghost" size="icon-sm" onClick={() => navigate("/dashboard")}>
 						<ArrowLeft className="size-4" />
 					</Button>
 					<div className="h-5 w-px bg-border" />
@@ -229,7 +229,15 @@ export default function UserReportPage() {
 						</div>
 					</>
 				) : (
-					<p className="text-muted-foreground italic">No tracked data available yet.</p>
+					<div className="flex flex-col items-center justify-center py-24 text-center">
+						<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+							<BarChart2 className="size-8 text-muted-foreground" />
+						</div>
+						<h3 className="text-lg font-semibold">No tracked data</h3>
+						<p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+							No tracked sessions available for this user yet.
+						</p>
+					</div>
 				)}
 			</main>
 		</div>

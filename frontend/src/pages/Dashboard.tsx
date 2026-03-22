@@ -9,7 +9,7 @@ import {
 	LetterText,
 	Notebook,
 	Trash2,
-	Users,
+	BarChart2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -98,11 +98,11 @@ export default function Dashboard() {
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() => navigate("/users")}
+							onClick={() => navigate(`/users/${user?._id}`)}
 							className="hidden sm:flex"
 						>
-							<Users className="size-4 mr-2" />
-							Active Writers
+							<BarChart2 className="size-4 mr-2" />
+							My report
 						</Button>
 
 						<Button
