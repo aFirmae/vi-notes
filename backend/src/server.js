@@ -34,11 +34,12 @@ app.get("/", (_req, res) => {
 });
 
 // Local server
-if (process.env.NODE_ENV !== "production" && !process.env.NETLIFY) {
+if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "test" && !process.env.NETLIFY) {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }
 
 // Serverless handler exports for Netlify / AWS Lambda
+module.exports = app;
 module.exports.handler = serverless(app);
