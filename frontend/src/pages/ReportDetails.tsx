@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -51,9 +51,12 @@ function MetricRow({ label, value, badge }: { label: string; value: string | num
 export default function ReportDetails() {
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
+	const location = useLocation()
 	const [report, setReport] = useState<Report | null>(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+	const sessionLabel =
+		(location.state as { sessionLabel?: string } | null)?.sessionLabel || "Session"
 
 	useEffect(() => {
 		if (!id) return
@@ -90,7 +93,7 @@ export default function ReportDetails() {
 					<div className="h-5 w-px bg-border" />
 					<div className="flex items-center gap-2">
 						<h1 className={`text-base font-semibold tracking-tight ${report.isDeleted ? 'line-through text-muted-foreground' : ''}`}>
-							{report.sessionTitle || "Untitled"}
+							{sessionLabel}
 						</h1>
 						{report.isDeleted && (
 							<span className="text-[10px] uppercase font-bold tracking-widest text-[#ef4444] bg-[#ef4444]/10 px-2 py-0.5 rounded">
@@ -109,7 +112,7 @@ export default function ReportDetails() {
 						<CardTitle className="text-base">Session Information</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-0">
-						<MetricRow label="Session Title" value={report.sessionTitle || "Untitled"} />
+						<MetricRow label="Session" value={sessionLabel} />
 						<MetricRow label="User Name" value={report.userFullName || "Writer"} />
 						<MetricRow label="User Email" value={report.userEmail} />
 						<MetricRow label="Session ID" value={report.sessionId} />
