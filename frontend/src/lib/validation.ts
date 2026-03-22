@@ -13,6 +13,13 @@ export function validatePassword(password: string): string | null {
 	return null;
 }
 
+export function validateFullName(fullName: string): string | null {
+	if (!fullName) return "Full name is required";
+	if (fullName.trim().length < 2) return "Please enter your full name";
+	if (!/^[a-zA-Z\s\-'\.]+$/.test(fullName)) return "Invalid characters in name";
+	return null;
+}
+
 export function getPasswordStrength(password: string): {
 	score: number;
 	label: string;

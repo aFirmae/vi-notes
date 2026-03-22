@@ -30,7 +30,6 @@ interface Report {
 	userEmail: string
 	userFullName: string
 	sessionId: string
-	sessionTitle: string
 	isDeleted?: boolean
 	reportData: ReportData
 	createdAt: string

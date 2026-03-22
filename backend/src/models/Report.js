@@ -19,10 +19,6 @@ const reportSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		sessionTitle: {
-			type: String,
-			default: "Untitled",
-		},
 		isDeleted: {
 			type: Boolean,
 			default: false,

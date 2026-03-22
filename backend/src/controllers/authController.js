@@ -11,6 +11,8 @@ const generateRefreshToken = (userId) => {
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+const isValidFullName = (fullName) => /^[a-zA-Z\s\-'\.]+$/.test(fullName);
+
 const validatePassword = (password) => {
 	const errors = [];
 	if (password.length < 8) errors.push("Password must be at least 8 characters");
@@ -31,9 +33,10 @@ const register = async (req, res) => {
 
 		// Validation
 		const fieldErrors = {};
-		if (!isValidEmail(email)) fieldErrors.email = "Invalid email format";
 		if (fullName.trim().length < 2) fieldErrors.fullName = "Full name must be at least 2 characters";
-		
+		if (!isValidFullName(fullName)) fieldErrors.fullName = "Full name can only contain letters, spaces, hyphens, apostrophes, and periods";
+		if (!isValidEmail(email)) fieldErrors.email = "Invalid email format";
+
 		const pwErrors = validatePassword(password);
 		if (pwErrors.length > 0) fieldErrors.password = pwErrors[0];
 

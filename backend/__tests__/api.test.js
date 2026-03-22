@@ -26,7 +26,7 @@ describe("Vi-Notes API Integration Tests", () => {
                     email: testEmail,
                     password: "securePassword123"
                 });
-            
+
             expect(res.statusCode).toEqual(201);
             expect(res.body).toHaveProperty("token");
             expect(res.body).toHaveProperty("user");
@@ -36,7 +36,7 @@ describe("Vi-Notes API Integration Tests", () => {
         });
 
         it("should not allow duplicate email registration", async () => {
-             const res = await request(app)
+            const res = await request(app)
                 .post("/api/auth/register")
                 .send({
                     fullName: "Duplicate User",
@@ -74,7 +74,7 @@ describe("Vi-Notes API Integration Tests", () => {
                     title: "Automated Test Session",
                     content: "This is rigorously tested content."
                 });
-            
+
             expect(res.statusCode).toEqual(201);
             expect(res.body).toHaveProperty("_id");
             expect(res.body).toHaveProperty("content", "This is rigorously tested content.");
@@ -85,7 +85,7 @@ describe("Vi-Notes API Integration Tests", () => {
             const res = await request(app)
                 .get("/api/sessions")
                 .set("Authorization", `Bearer ${token}`);
-            
+
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body)).toBeTruthy();
             expect(res.body.length).toBeGreaterThanOrEqual(1);
@@ -98,7 +98,7 @@ describe("Vi-Notes API Integration Tests", () => {
                 .send({
                     content: "This content was securely updated via the API."
                 });
-            
+
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty("content", "This content was securely updated via the API.");
         });
@@ -107,25 +107,25 @@ describe("Vi-Notes API Integration Tests", () => {
     describe("Reports API (Typing Delta Simulation)", () => {
         it("should upsert delta report accurately via typing events", async () => {
             const deltaPayload = {
-				userId,
-				userEmail: testEmail,
-				userFullName: "Rigorous Test User",
-				sessionTitle: "Automated Test Session",
-				wordCount: 8,
-				characterCount: 46,
-				deltaKeystrokes: 46,
-				deltaInterval: 1250,
-				deltaPauses: 1,
-				deltaPastes: 0,
-				deltaPastedChars: 0,
-				deltaDeletes: 0
-			};
+                userId,
+                userEmail: testEmail,
+                userFullName: "Rigorous Test User",
+
+                wordCount: 8,
+                characterCount: 46,
+                deltaKeystrokes: 46,
+                deltaInterval: 1250,
+                deltaPauses: 1,
+                deltaPastes: 0,
+                deltaPastedChars: 0,
+                deltaDeletes: 0
+            };
 
             const res = await request(app)
                 .put(`/api/reports/session/${sessionId}/delta`)
                 .set("Authorization", `Bearer ${token}`)
                 .send(deltaPayload);
-            
+
             expect(res.statusCode).toEqual(200);
             expect(res.body.reportData).toHaveProperty("keystrokeCount", 46);
         });
@@ -134,7 +134,7 @@ describe("Vi-Notes API Integration Tests", () => {
             const res = await request(app)
                 .get(`/api/users/${userId}/report`)
                 .set("Authorization", `Bearer ${token}`);
-            
+
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty("aggregate");
             expect(res.body.aggregate).toHaveProperty("totalWordCount");
@@ -149,7 +149,7 @@ describe("Vi-Notes API Integration Tests", () => {
             const res = await request(app)
                 .get("/api/users")
                 .set("Authorization", `Bearer ${token}`);
-            
+
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body)).toBeTruthy();
         });
@@ -158,7 +158,7 @@ describe("Vi-Notes API Integration Tests", () => {
             const res = await request(app)
                 .get("/api/users?s=Rigorous")
                 .set("Authorization", `Bearer ${token}`);
-            
+
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body)).toBeTruthy();
             expect(res.body.length).toBeGreaterThanOrEqual(1);
@@ -170,7 +170,7 @@ describe("Vi-Notes API Integration Tests", () => {
             const res = await request(app)
                 .get("/api/users?s=ImpossiblyRandomStringNoBodyHas")
                 .set("Authorization", `Bearer ${token}`);
-            
+
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body)).toBeTruthy();
             expect(res.body.length).toEqual(0);

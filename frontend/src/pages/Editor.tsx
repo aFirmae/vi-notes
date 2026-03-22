@@ -113,7 +113,6 @@ export default function Editor() {
 			userId: user._id,
 			userEmail: user.email,
 			userFullName: user.fullName || "Writer",
-			sessionTitle: currentTitle || "Untitled",
 			wordCount,
 			characterCount: currentContent.length,
 			deltaKeystrokes,

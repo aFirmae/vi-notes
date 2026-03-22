@@ -36,7 +36,6 @@ interface ReportData {
 interface SessionReport {
 	_id: string
 	sessionId: string
-	sessionTitle: string
 	reportData: ReportData
 	isDeleted: boolean
 	createdAt: string

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { validateEmail, validatePassword, getPasswordStrength } from "@/lib/validation"
+import { validateEmail, validatePassword, validateFullName, getPasswordStrength } from "@/lib/validation"
 import { useAuth } from "@/context/AuthContext"
 import { api } from "@/services/api"
 import { PenLine, Eye, EyeOff } from "lucide-react"
@@ -87,7 +87,7 @@ export default function Register() {
 	const handleRegister = async (e: React.FormEvent) => {
 		e.preventDefault()
 		
-		const nameError = fullName.trim().length < 2 ? "Please enter your full name" : null
+		const nameError = validateFullName(fullName)
 		const emailError = validateEmail(email)
 		const pwError = validatePassword(password)
 		const confirmError = password !== confirmPassword ? "Passwords do not match" : null
