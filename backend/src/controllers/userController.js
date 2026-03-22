@@ -4,9 +4,18 @@ const Report = require("../models/Report");
 // GET /api/users
 const getUsersWithReports = async (req, res) => {
 	try {
+		const s = req.query.s;
 		const userIdsWithReports = await Report.distinct("userId");
 
-		const users = await User.find({ _id: { $in: userIdsWithReports } }).select(
+		const query = { _id: { $in: userIdsWithReports } };
+		if (s) {
+			query.$or = [
+				{ fullName: { $regex: s, $options: "i" } },
+				{ email: { $regex: s, $options: "i" } },
+			];
+		}
+
+		const users = await User.find(query).select(
 			"-passwordHash -__v"
 		);
 

@@ -86,11 +86,15 @@ const deleteSession = async (req, res) => {
 			return res.status(404).json({ message: "Session not found" });
 		}
 
-		// Soft delete the behaviour report to retain history
-		await Report.findOneAndUpdate(
-			{ sessionId: req.params.id },
-			{ isDeleted: true }
-		);
+		const report = await Report.findOne({ sessionId: req.params.id });
+		if (report) {
+			if (report.reportData && report.reportData.keystrokeCount === 0) {
+				await Report.deleteOne({ _id: report._id });
+			} else {
+				report.isDeleted = true;
+				await report.save();
+			}
+		}
 
 		res.json({ message: "Session deleted" });
 	} catch (error) {
