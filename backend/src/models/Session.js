@@ -17,14 +17,6 @@ const sessionSchema = new mongoose.Schema(
 			type: String,
 			default: "",
 		},
-		keystrokeData: {
-			type: [mongoose.Schema.Types.Mixed],
-			default: [],
-		},
-		pasteEvents: {
-			type: [mongoose.Schema.Types.Mixed],
-			default: [],
-		},
 	},
 	{ timestamps: true }
 );

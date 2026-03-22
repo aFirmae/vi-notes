@@ -49,8 +49,8 @@ export default function Editor() {
 	const flushTrackerDelta = useCallback(async (currentTitle: string, currentContent: string) => {
 		if (!id || !user) return
 
-		const ks = tracker.keystrokeData.current
-		const pe = tracker.pasteEvents.current
+		const ks = tracker.keystrokeBuffer.current
+		const pe = tracker.pasteBuffer.current
 		const paus = tracker.pauseEvents.current
 
 		const deltaKeystrokes = ks.length
@@ -93,8 +93,8 @@ export default function Editor() {
 	useEffect(() => {
 		const intervalId = setInterval(() => {
 			const hasDeltas =
-				tracker.keystrokeData.current.length > 0 ||
-				tracker.pasteEvents.current.length > 0 ||
+				tracker.keystrokeBuffer.current.length > 0 ||
+				tracker.pasteBuffer.current.length > 0 ||
 				tracker.pauseEvents.current.length > 0 ||
 				tracker.deleteCount.current > 0
 			

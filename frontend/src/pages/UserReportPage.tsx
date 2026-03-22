@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { ArrowLeft, User, BarChart2 } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -105,6 +105,9 @@ export default function UserReportPage() {
 	const chartData = [...reports].reverse().map((r, i) => ({
 		name: r.sessionTitle || `Session ${i + 1}`,
 		words: r.reportData.wordCount,
+		chars: r.reportData.characterCount,
+		pastedChars: r.reportData.totalPastedCharacters,
+		keystrokes: r.reportData.keystrokeCount,
 		speedMs: r.reportData.averageKeystrokeInterval,
 		pastes: r.reportData.pasteCount,
 		deletes: r.reportData.deleteCount,
@@ -113,9 +116,10 @@ export default function UserReportPage() {
 	}))
 
 	const chartConfig = {
-		deletes: { label: "Deletes / Backspaces", color: "var(--color-chart-1)" },
-		speedMs: { label: "Average Interval (ms)", color: "var(--color-chart-2)" },
-		pastes: { label: "Paste Count", color: "var(--color-chart-3)" }
+		chars: { label: "Total Characters", color: "var(--color-chart-1)" },
+		pastedChars: { label: "Pasted Characters", color: "var(--color-chart-2)" },
+		keystrokes: { label: "Total Keystrokes", color: "var(--color-chart-3)" },
+		deletes: { label: "Deletes / Backspaces", color: "var(--color-chart-4)" },
 	}
 
 	return (
@@ -160,30 +164,11 @@ export default function UserReportPage() {
 
 						{/* Charts */}
 						<div className="grid gap-6 md:grid-cols-2">
-							{/* Editing Behaviour Trend */}
+							{/* Total Characters Trend */}
 							<Card className="shadow-sm">
 								<CardHeader>
-									<CardTitle className="text-base">Editing Behaviour Trend</CardTitle>
-									<CardDescription>Frequency of deletes/backspaces per session</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<ChartContainer config={chartConfig} className="min-h-[250px] w-full">
-										<AreaChart data={chartData} margin={{ top: 20, left: -20, right: 10, bottom: 0 }}>
-											<CartesianGrid vertical={false} strokeDasharray="3 3" />
-											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(val) => val.slice(0, 8)} />
-											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-											<ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-											<Area type="monotone" dataKey="deletes" stroke="var(--color-deletes)" fillOpacity={0.2} fill="var(--color-deletes)" dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
-										</AreaChart>
-									</ChartContainer>
-								</CardContent>
-							</Card>
-
-							{/* Typing Speed Trend */}
-							<Card className="shadow-sm">
-								<CardHeader>
-									<CardTitle className="text-base">Keystroke Interval Trend</CardTitle>
-									<CardDescription>Lower interval (ms) = faster typing</CardDescription>
+									<CardTitle className="text-base">Total Characters Trend</CardTitle>
+									<CardDescription>Number of characters typed per session</CardDescription>
 								</CardHeader>
 								<CardContent>
 									<ChartContainer config={chartConfig} className="min-h-[250px] w-full">
@@ -192,7 +177,64 @@ export default function UserReportPage() {
 											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(val) => val.slice(0, 8)} />
 											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
 											<ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-											<Line type="monotone" dataKey="speedMs" stroke="var(--color-speedMs)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
+											<Line type="monotone" dataKey="chars" stroke="var(--color-chars)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
+										</LineChart>
+									</ChartContainer>
+								</CardContent>
+							</Card>
+
+							{/* Pasted Characters Trend */}
+							<Card className="shadow-sm">
+								<CardHeader>
+									<CardTitle className="text-base">Pasted Characters Trend</CardTitle>
+									<CardDescription>Number of characters pasted per session</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+										<LineChart data={chartData} margin={{ top: 20, left: -20, right: 10, bottom: 0 }}>
+											<CartesianGrid vertical={false} strokeDasharray="3 3" />
+											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(val) => val.slice(0, 8)} />
+											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+											<ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+											<Line type="monotone" dataKey="pastedChars" stroke="var(--color-pastedChars)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
+										</LineChart>
+									</ChartContainer>
+								</CardContent>
+							</Card>
+
+							{/* Total Keystrokes Trend */}
+							<Card className="shadow-sm">
+								<CardHeader>
+									<CardTitle className="text-base">Total Keystrokes Trend</CardTitle>
+									<CardDescription>Frequency of keystrokes per session</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+										<LineChart data={chartData} margin={{ top: 20, left: -20, right: 10, bottom: 0 }}>
+											<CartesianGrid vertical={false} strokeDasharray="3 3" />
+											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(val) => val.slice(0, 8)} />
+											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+											<ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+											<Line type="monotone" dataKey="keystrokes" stroke="var(--color-keystrokes)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
+										</LineChart>
+									</ChartContainer>
+								</CardContent>
+							</Card>
+
+							{/* Editing Behaviour Trend */}
+							<Card className="shadow-sm">
+								<CardHeader>
+									<CardTitle className="text-base">Editing Behaviour Trend</CardTitle>
+									<CardDescription>Frequency of deletes/backspaces per session</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+										<LineChart data={chartData} margin={{ top: 20, left: -20, right: 10, bottom: 0 }}>
+											<CartesianGrid vertical={false} strokeDasharray="3 3" />
+											<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} tickFormatter={(val) => val.slice(0, 8)} />
+											<YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+											<ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+											<Line type="monotone" dataKey="deletes" stroke="var(--color-deletes)" strokeWidth={2} dot={renderCustomDot} activeDot={{ r: 6, fill: "#000000", stroke: "#000000" }} />
 										</LineChart>
 									</ChartContainer>
 								</CardContent>

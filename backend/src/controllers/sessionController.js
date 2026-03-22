@@ -23,8 +23,7 @@ const createSession = async (req, res) => {
 const getSessions = async (req, res) => {
 	try {
 		const sessions = await Session.find({ userId: req.userId })
-			.sort({ updatedAt: -1 })
-			.select("-keystrokeData -pasteEvents");
+			.sort({ updatedAt: -1 });
 
 		res.json(sessions);
 	} catch (error) {

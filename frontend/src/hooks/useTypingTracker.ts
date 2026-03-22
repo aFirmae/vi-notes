@@ -17,8 +17,8 @@ export interface PauseEntry {
 }
 
 export interface TypingTrackerResult {
-	keystrokeData: React.MutableRefObject<KeystrokeEntry[]>
-	pasteEvents: React.MutableRefObject<PasteEntry[]>
+	keystrokeBuffer: React.MutableRefObject<KeystrokeEntry[]>
+	pasteBuffer: React.MutableRefObject<PasteEntry[]>
 	pauseEvents: React.MutableRefObject<PauseEntry[]>
 	deleteCount: React.MutableRefObject<number>
 	onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
@@ -30,8 +30,8 @@ export interface TypingTrackerResult {
 const PAUSE_THRESHOLD_MS = 2000
 
 export function useTypingTracker(): TypingTrackerResult {
-	const keystrokeData = useRef<KeystrokeEntry[]>([])
-	const pasteEvents = useRef<PasteEntry[]>([])
+	const keystrokeBuffer = useRef<KeystrokeEntry[]>([])
+	const pasteBuffer = useRef<PasteEntry[]>([])
 	const pauseEvents = useRef<PauseEntry[]>([])
 	const deleteCount = useRef(0)
 
@@ -67,7 +67,7 @@ export function useTypingTracker(): TypingTrackerResult {
 			const interval =
 				lastKeyDownTime.current !== null ? keyDownTime - lastKeyDownTime.current : 0
 
-			keystrokeData.current.push({
+			keystrokeBuffer.current.push({
 				keyDownTime,
 				keyUpTime: now,
 				interval,
@@ -81,15 +81,15 @@ export function useTypingTracker(): TypingTrackerResult {
 
 	const onPaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
 		const text = e.clipboardData.getData("text")
-		pasteEvents.current.push({
+		pasteBuffer.current.push({
 			timestamp: Date.now(),
 			length: text.length,
 		})
 	}, [])
 
 	const resetTracker = useCallback(() => {
-		keystrokeData.current = []
-		pasteEvents.current = []
+		keystrokeBuffer.current = []
+		pasteBuffer.current = []
 		pauseEvents.current = []
 		deleteCount.current = 0
 		lastKeyDownTime.current = null
@@ -98,8 +98,8 @@ export function useTypingTracker(): TypingTrackerResult {
 	}, [])
 
 	return {
-		keystrokeData,
-		pasteEvents,
+		keystrokeBuffer,
+		pasteBuffer,
 		pauseEvents,
 		deleteCount,
 		onKeyDown,
