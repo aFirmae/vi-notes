@@ -81,6 +81,22 @@ export default function ReportDetails() {
 	
 	const { reportData } = report
 
+	const getAverageIntervalBadge = (interval: number): string => {
+		if (interval > 150) return "Normal"
+		if (interval > 300) return "Fast"
+		if (interval > 500) return "Blazing Fast"
+		if (interval > 1000) return "Insanly Fast"
+		return "Slow"
+	}
+
+	const getPauseBadge = (pauseCount: number, keystrokeCount: number): string => {
+		if (pauseCount === 0) return "None"
+		const pausePercentage = (pauseCount / keystrokeCount) * 100
+		if (pausePercentage > 15) return "Many"
+		if (pausePercentage > 5) return "Moderate"
+		return "Few"
+	}
+
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Header */}
@@ -142,7 +158,7 @@ export default function ReportDetails() {
 						<MetricRow
 							label="Average Keystroke Interval"
 							value={`${reportData.averageKeystrokeInterval} ms`}
-							badge={reportData.averageKeystrokeInterval < 150 ? "Fast" : reportData.averageKeystrokeInterval < 350 ? "Normal" : "Slow"}
+							badge={getAverageIntervalBadge(reportData.averageKeystrokeInterval)}
 						/>
 						<MetricRow label="Delete / Backspace Count" value={reportData.deleteCount.toLocaleString()} />
 					</CardContent>
@@ -157,7 +173,7 @@ export default function ReportDetails() {
 						<MetricRow
 							label="Pauses Detected"
 							value={reportData.pauseCount}
-							badge={reportData.pauseCount === 0 ? "None" : reportData.pauseCount < 5 ? "Few" : "Many"}
+							badge={getPauseBadge(reportData.pauseCount, reportData.keystrokeCount)}
 						/>
 					</CardContent>
 				</Card>
