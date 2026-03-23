@@ -83,11 +83,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 		error: null,
 	})
 	
-	const { isAuthenticated } = useAuth()
+const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
 
 	const fetchSessions = useCallback(async () => {
 		if (!isAuthenticated) return
-		
+
 		dispatch({ type: "SET_LOADING", payload: true })
 		try {
 			const { data } = await api.get("/api/sessions")
@@ -97,14 +97,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 		}
 	}, [isAuthenticated])
 
-	// Fetch automatically when auth state becomes ready
 	useEffect(() => {
+		if (isAuthLoading) return
+
 		if (isAuthenticated) {
 			fetchSessions()
 		} else {
 			dispatch({ type: "SET_SESSIONS", payload: [] }) // clear on logout
 		}
-	}, [isAuthenticated, fetchSessions])
+	}, [isAuthLoading, isAuthenticated, fetchSessions])
 
 	const addSession = async (data?: Partial<Pick<Session, "title" | "content">>): Promise<string | undefined> => {
 		try {

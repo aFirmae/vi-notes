@@ -2,9 +2,9 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Typography from '@tiptap/extension-typography'
+import { CustomOrderedList } from './CustomOrderedList'
 import { Markdown } from 'tiptap-markdown'
 import { useEffect } from 'react'
-import { CustomOrderedList } from './CustomOrderedList'
 
 interface TiptapEditorProps {
     value: string

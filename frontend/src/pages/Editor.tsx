@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Save, PenLine, Check, Trash2 } from "lucide-react"
 
 import WritingEditor from "@/components/WritingEditor"
+import NotFound from "@/pages/NotFound"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSession } from "@/context/SessionContext"
@@ -13,7 +14,7 @@ import { api } from "@/services/api"
 export default function Editor() {
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
-	const { getSession, addSession, updateSession, deleteSession } = useSession()
+	const { getSession, addSession, updateSession, deleteSession, isLoading } = useSession()
 	const { user } = useAuth()
 	const tracker = useTypingTracker()
 
@@ -170,22 +171,17 @@ export default function Editor() {
 		setTimeout(() => setSaved(false), 1500)
 	}
 
-	// If session doesn't exist then redirect
-	if (sessionId && !session) {
+	if (isLoading) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-background">
-				<div className="text-center animate-fade-in">
-					<p className="text-muted-foreground">Session not found.</p>
-					<Button
-						variant="outline"
-						className="mt-4"
-						onClick={() => navigate("/dashboard")}
-					>
-						Back to Dashboard
-					</Button>
-				</div>
+			<div className="flex min-h-screen flex-col items-center justify-center bg-background animate-fade-in-up">
+				<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
+				<p className="text-sm text-muted-foreground tracking-tight">Loading session editor...</p>
 			</div>
 		)
+	}
+
+	if (sessionId && !session) {
+		return <NotFound homeHref="/dashboard" />
 	}
 
 	return (
