@@ -1,31 +1,25 @@
 import { LetterText, Hash } from "lucide-react"
-import type { Ref } from "react"
-
 import { Card, CardContent } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import TiptapEditor from "./TiptapEditor"
 
 interface WritingEditorProps {
 	value: string
 	onChange: (value: string) => void
-	textareaRef?: Ref<HTMLTextAreaElement>
-	onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
-	onKeyUp?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
-	onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void
+	onKeyDown?: (e: React.KeyboardEvent<any>) => void
+	onKeyUp?: (e: React.KeyboardEvent<any>) => void
+	onPaste?: (e: React.ClipboardEvent<any>) => void
 }
 
-export default function WritingEditor({ value, onChange, textareaRef, onKeyDown, onKeyUp, onPaste }: WritingEditorProps) {
+export default function WritingEditor({ value, onChange, onKeyDown, onKeyUp, onPaste }: WritingEditorProps) {
 	const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0
 
 	return (
 		<div className="w-full max-w-3xl space-y-4 animate-slide-up">
 			<Card className="shadow-lg">
 				<CardContent className="p-0">
-					<Textarea
-						ref={textareaRef}
-						className="min-h-[520px] resize-none rounded-xl border-0 px-8 py-8 text-lg leading-loose shadow-none focus-visible:ring-0 focus-visible:shadow-none"
-						placeholder="Start writing..."
+					<TiptapEditor
 						value={value}
-						onChange={(e) => onChange(e.target.value)}
+						onChange={onChange}
 						onKeyDown={onKeyDown}
 						onKeyUp={onKeyUp}
 						onPaste={onPaste}

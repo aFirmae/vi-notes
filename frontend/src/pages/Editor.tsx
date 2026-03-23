@@ -26,7 +26,6 @@ export default function Editor() {
 	const [saved, setSaved] = useState(false)
 	const hasAnyKeystrokeRef = useRef(false)
 	const creatingSessionRef = useRef(false)
-	const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 	const titleInputRef = useRef<HTMLInputElement | null>(null)
 
 	useEffect(() => {
@@ -35,16 +34,6 @@ export default function Editor() {
 			return
 		}
 		setSessionId(id)
-	}, [id])
-
-	useEffect(() => {
-		const textarea = textareaRef.current
-		if (!textarea) return
-		if (document.activeElement === titleInputRef.current) return
-
-		textarea.focus()
-		const end = textarea.value.length
-		textarea.setSelectionRange(end, end)
 	}, [id])
 
 	// Sync changes to context
@@ -263,7 +252,6 @@ export default function Editor() {
 				<WritingEditor
 					value={content}
 					onChange={setContent}
-					textareaRef={textareaRef}
 					onKeyDown={(e) => {
 						hasAnyKeystrokeRef.current = true
 						tracker.onKeyDown(e)

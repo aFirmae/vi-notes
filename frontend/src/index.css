@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
@@ -134,7 +135,6 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* ——— Dot‑grid background for auth pages ——— */
 .bg-dot-grid {
     background-image: radial-gradient(circle, oklch(0.8 0 0) 1px, transparent 1px);
     background-size: 24px 24px;
