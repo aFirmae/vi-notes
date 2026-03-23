@@ -128,6 +128,41 @@ describe("Vi-Notes API Integration Tests", () => {
 
             expect(res.statusCode).toEqual(200);
             expect(res.body.reportData).toHaveProperty("keystrokeCount", 46);
+            reportId = res.body._id;
+        });
+
+        it("should not create duplicate reports on subsequent upserts", async () => {
+            const deltaPayload2 = {
+                userId,
+                userEmail: testEmail,
+                userFullName: "Rigorous Test User",
+
+                wordCount: 10,
+                characterCount: 50,
+                deltaKeystrokes: 4,
+                deltaInterval: 500,
+                deltaPauses: 0,
+                deltaPastes: 0,
+                deltaPastedChars: 0,
+                deltaDeletes: 0
+            };
+
+            const res = await request(app)
+                .put(`/api/reports/session/${sessionId}/delta`)
+                .set("Authorization", `Bearer ${token}`)
+                .send(deltaPayload2);
+
+            expect(res.statusCode).toEqual(200);
+            // It should be the exact same report ID
+            expect(res.body._id).toEqual(reportId);
+            // It should correctly increment the keystrokes (46 + 4)
+            expect(res.body.reportData).toHaveProperty("keystrokeCount", 50);
+            expect(res.body.reportData).toHaveProperty("wordCount", 10);
+
+            // Further verify directly from Database directly that only 1 report exists for this session
+            const Report = mongoose.model("Report");
+            const count = await Report.countDocuments({ sessionId });
+            expect(count).toEqual(1);
         });
 
         it("should properly aggregate behavior data when requesting User Report", async () => {
@@ -141,6 +176,21 @@ describe("Vi-Notes API Integration Tests", () => {
             expect(res.body.aggregate.totalKeystrokes).toBeGreaterThanOrEqual(46);
             expect(res.body).toHaveProperty("reports");
             expect(Array.isArray(res.body.reports)).toBeTruthy();
+        });
+
+        it("should soft-delete report when session is deleted", async () => {
+            // Delete the session
+            const resSession = await request(app)
+                .delete(`/api/sessions/${sessionId}`)
+                .set("Authorization", `Bearer ${token}`);
+
+            expect(resSession.statusCode).toEqual(200);
+
+            // Verify the report was marked as deleted
+            const Report = mongoose.model("Report");
+            const report = await Report.findOne({ sessionId });
+            expect(report).not.toBeNull();
+            expect(report.isDeleted).toBe(true);
         });
     });
 

@@ -82,10 +82,12 @@ export default function ReportDetails() {
 	const { reportData } = report
 
 	const getAverageIntervalBadge = (interval: number): string => {
-		if (interval > 1000) return "Insanly Fast"
-		if (interval > 500) return "Blazing Fast"
-		if (interval > 300) return "Fast"
-		if (interval > 150) return "Normal"
+		if (interval === 0) return "None"
+
+		if (interval < 100) return "Insanely Fast"
+		if (interval < 150) return "Blazing Fast"
+		if (interval < 300) return "Fast"
+		if (interval < 500) return "Normal"
 		return "Slow"
 	}
 
