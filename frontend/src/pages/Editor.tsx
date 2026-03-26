@@ -25,21 +25,37 @@ export default function Editor() {
 	const [title, setTitle] = useState(session?.title ?? "")
 	const [content, setContent] = useState(session?.content ?? "")
 	const [saved, setSaved] = useState(false)
+	const [isDeleting, setIsDeleting] = useState(false)
+	const [isDeletingAndRedirecting, setIsDeletingAndRedirecting] = useState(false)
 	const hasAnyKeystrokeRef = useRef(false)
 	const creatingSessionRef = useRef(false)
+	const hydratedSessionIdRef = useRef<string | undefined>(undefined)
 	const titleInputRef = useRef<HTMLInputElement | null>(null)
 
 	useEffect(() => {
 		if (!id || id === "new") {
 			setSessionId(undefined)
+			hydratedSessionIdRef.current = undefined
+			setTitle("")
+			setContent("")
 			return
 		}
 		setSessionId(id)
 	}, [id])
 
+	useEffect(() => {
+		if (!sessionId || !session) return
+		if (hydratedSessionIdRef.current === sessionId) return
+
+		setTitle(session.title ?? "")
+		setContent(session.content ?? "")
+		hydratedSessionIdRef.current = sessionId
+	}, [sessionId, session])
+
 	// Sync changes to context
 	useEffect(() => {
 		if (!sessionId || !session) return
+		if (hydratedSessionIdRef.current !== sessionId) return
 		if (title === session?.title && content === session?.content) return
 		
 		updateSession(sessionId, { title, content })
@@ -150,12 +166,38 @@ export default function Editor() {
 		navigate("/dashboard")
 	}, [navigate])
 
-	const handleDelete = () => {
-		if (sessionId) {
-			deleteSession(sessionId)
+	const handleDelete = async () => {
+		if (!sessionId) {
+			navigate("/dashboard", { replace: true })
+			return
 		}
-		navigate("/dashboard")
+
+		setIsDeletingAndRedirecting(true)
+		setIsDeleting(true)
+		try {
+			await deleteSession(sessionId)
+			navigate("/dashboard", { replace: true })
+		} catch (error) {
+			console.error("Failed to delete session:", error)
+			setIsDeletingAndRedirecting(false)
+		} finally {
+			setIsDeleting(false)
+		}
 	}
+
+	const handleEditorChange = useCallback((nextContent: string) => {
+		const persistedContent = session?.content ?? ""
+		const isHydratedExistingSession = Boolean(sessionId && session && hydratedSessionIdRef.current === sessionId)
+		const isSpuriousInitialEmptyUpdate =
+			isHydratedExistingSession &&
+			!hasAnyKeystrokeRef.current &&
+			nextContent === "" &&
+			persistedContent.trim().length > 0 &&
+			content === persistedContent
+
+		if (isSpuriousInitialEmptyUpdate) return
+		setContent(nextContent)
+	}, [sessionId, session, content])
 
 	// Save feedback
 	const handleSave = async () => {
@@ -180,7 +222,16 @@ export default function Editor() {
 		)
 	}
 
-	if (sessionId && !session) {
+	if (isDeleting) {
+		return (
+			<div className="flex min-h-screen flex-col items-center justify-center bg-background animate-fade-in-up">
+				<div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
+				<p className="text-sm text-muted-foreground tracking-tight">Deleting...</p>
+			</div>
+		)
+	}
+
+	if (sessionId && !session && !isDeletingAndRedirecting) {
 		return <NotFound homeHref="/dashboard" />
 	}
 
@@ -217,6 +268,7 @@ export default function Editor() {
 							size="sm"
 							variant="ghost"
 							onClick={handleDelete}
+							disabled={isDeleting}
 							className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 						>
 							<Trash2 className="size-4" />
@@ -226,6 +278,7 @@ export default function Editor() {
 							size="sm"
 							variant="outline"
 							onClick={handleSave}
+							disabled={isDeleting}
 						>
 							{saved ? (
 								<>
@@ -247,7 +300,7 @@ export default function Editor() {
 			<main className="flex flex-1 justify-center px-6 py-10 animate-fade-in">
 				<WritingEditor
 					value={content}
-					onChange={setContent}
+					onChange={handleEditorChange}
 					onKeyDown={(e) => {
 						hasAnyKeystrokeRef.current = true
 						tracker.onKeyDown(e)

@@ -136,12 +136,12 @@ const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
 	}
 
 	const deleteSession = async (id: string) => {
-		// Optimistically update UI
-		dispatch({ type: "DELETE_SESSION", payload: id })
 		try {
 			await api.delete(`/api/sessions/${id}`)
+			dispatch({ type: "DELETE_SESSION", payload: id })
 		} catch (err) {
 			console.error("Failed to delete session on server:", err)
+			throw err
 		}
 	}
 
