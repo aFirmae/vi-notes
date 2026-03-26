@@ -27,15 +27,16 @@ export default function Editor() {
 	const [saved, setSaved] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [isDeletingAndRedirecting, setIsDeletingAndRedirecting] = useState(false)
+	const [hydratedSessionId, setHydratedSessionId] = useState<string | undefined>(undefined)
 	const hasAnyKeystrokeRef = useRef(false)
 	const creatingSessionRef = useRef(false)
-	const hydratedSessionIdRef = useRef<string | undefined>(undefined)
 	const titleInputRef = useRef<HTMLInputElement | null>(null)
 
 	useEffect(() => {
 		if (!id || id === "new") {
 			setSessionId(undefined)
-			hydratedSessionIdRef.current = undefined
+			setHydratedSessionId(undefined)
+			hasAnyKeystrokeRef.current = false
 			setTitle("")
 			setContent("")
 			return
@@ -45,21 +46,22 @@ export default function Editor() {
 
 	useEffect(() => {
 		if (!sessionId || !session) return
-		if (hydratedSessionIdRef.current === sessionId) return
+		if (hydratedSessionId === sessionId) return
 
 		setTitle(session.title ?? "")
 		setContent(session.content ?? "")
-		hydratedSessionIdRef.current = sessionId
-	}, [sessionId, session])
+		hasAnyKeystrokeRef.current = false
+		setHydratedSessionId(sessionId)
+	}, [sessionId, session, hydratedSessionId])
 
 	// Sync changes to context
 	useEffect(() => {
 		if (!sessionId || !session) return
-		if (hydratedSessionIdRef.current !== sessionId) return
+		if (hydratedSessionId !== sessionId) return
 		if (title === session?.title && content === session?.content) return
 		
 		updateSession(sessionId, { title, content })
-	}, [title, content, sessionId, session?.title, session?.content, updateSession])
+	}, [title, content, sessionId, session?.title, session?.content, updateSession, hydratedSessionId])
 
 	const latestState = useRef({ title, content })
 	useEffect(() => {
@@ -187,7 +189,7 @@ export default function Editor() {
 
 	const handleEditorChange = useCallback((nextContent: string) => {
 		const persistedContent = session?.content ?? ""
-		const isHydratedExistingSession = Boolean(sessionId && session && hydratedSessionIdRef.current === sessionId)
+		const isHydratedExistingSession = Boolean(sessionId && session && hydratedSessionId === sessionId)
 		const isSpuriousInitialEmptyUpdate =
 			isHydratedExistingSession &&
 			!hasAnyKeystrokeRef.current &&
@@ -197,7 +199,7 @@ export default function Editor() {
 
 		if (isSpuriousInitialEmptyUpdate) return
 		setContent(nextContent)
-	}, [sessionId, session, content])
+	}, [sessionId, session, content, hydratedSessionId])
 
 	// Save feedback
 	const handleSave = async () => {

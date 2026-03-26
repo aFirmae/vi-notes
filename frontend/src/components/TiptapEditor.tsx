@@ -52,6 +52,12 @@ export default function TiptapEditor({ value, onChange, onKeyDown, onKeyUp, onPa
                 if (onKeyDown) onKeyDown(event as any)
                 return false
             },
+            handleDOMEvents: {
+                keyup: (_view, event) => {
+                    if (onKeyUp) onKeyUp(event as any)
+                    return false
+                }
+            },
             handlePaste: (_view, event, _slice) => {
                 if (onPaste) onPaste(event as any)
                 return false
@@ -66,10 +72,7 @@ export default function TiptapEditor({ value, onChange, onKeyDown, onKeyUp, onPa
     }, [value, editor])
 
     return (
-        <div 
-            className="w-full text-lg leading-loose"
-            onKeyUp={onKeyUp}
-        >
+        <div className="w-full text-lg leading-loose">
             <style>{`
                 .is-editor-empty::before {
                     content: attr(data-placeholder);

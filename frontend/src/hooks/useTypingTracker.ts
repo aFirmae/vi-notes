@@ -35,10 +35,9 @@ export function useTypingTracker(): TypingTrackerResult {
 	const pauseEvents = useRef<PauseEntry[]>([])
 	const deleteCount = useRef(0)
 
-	// Internal timing refs
+	const activeKeys = useRef<Map<string, { time: number; interval: number }>>(new Map())
 	const lastKeyDownTime = useRef<number | null>(null)
 	const lastKeyUpTime = useRef<number | null>(null)
-	const keyDownAtRef = useRef<number | null>(null)
 
 	const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		const now = Date.now()
@@ -49,33 +48,35 @@ export function useTypingTracker(): TypingTrackerResult {
 		}
 
 		// Detect pause since last keystroke
-		if (lastKeyUpTime.current !== null) {
+		if (lastKeyUpTime.current !== null && activeKeys.current.size === 0) {
 			const gap = now - lastKeyUpTime.current
 			if (gap > PAUSE_THRESHOLD_MS) {
 				pauseEvents.current.push({ timestamp: now, durationMs: gap })
 			}
 		}
 
-		keyDownAtRef.current = now
+		const targetKey = e.code || e.key
+		if (!activeKeys.current.has(targetKey)) {
+			const interval = lastKeyDownTime.current !== null ? now - lastKeyDownTime.current : 0
+			activeKeys.current.set(targetKey, { time: now, interval })
+			lastKeyDownTime.current = now
+		}
 	}, [])
 
-	const onKeyUp = useCallback((_e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+	const onKeyUp = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		const now = Date.now()
-		const keyDownTime = keyDownAtRef.current
+		const targetKey = e.code || e.key
+		const keyRecord = activeKeys.current.get(targetKey)
 
-		if (keyDownTime !== null) {
-			const interval =
-				lastKeyDownTime.current !== null ? keyDownTime - lastKeyDownTime.current : 0
-
+		if (keyRecord !== undefined) {
 			keystrokeBuffer.current.push({
-				keyDownTime,
+				keyDownTime: keyRecord.time,
 				keyUpTime: now,
-				interval,
+				interval: keyRecord.interval,
 			})
 
-			lastKeyDownTime.current = keyDownTime
 			lastKeyUpTime.current = now
-			keyDownAtRef.current = null
+			activeKeys.current.delete(targetKey)
 		}
 	}, [])
 
@@ -92,9 +93,6 @@ export function useTypingTracker(): TypingTrackerResult {
 		pasteBuffer.current = []
 		pauseEvents.current = []
 		deleteCount.current = 0
-		lastKeyDownTime.current = null
-		lastKeyUpTime.current = null
-		keyDownAtRef.current = null
 	}, [])
 
 	return {
